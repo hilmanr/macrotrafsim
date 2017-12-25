@@ -1,0 +1,23 @@
+{
+  "name": "tutorial_node_js_restful",
+  "version": "1.0.0",
+  "description": "Belajar Node JS RESTful untuk backend sistem tesis",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Hilman Ramadhan",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  },
+  "dependencies": {
+    "@google/maps": "^0.3.1",
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3",
+    "file-system": "^2.2.2",
+    "mongoose": "^4.10.3",
+    "xmldom": "^0.1.27"
+  },
+  "start": "nodemon server.js"
+}

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="CGImap 0.6.0 (6239 thorn-02.openstreetmap.org)" copyright="OpenStreetMap and contributors" attribution="http://www.openstreetmap.org/copyright" license="http://opendatacommons.org/licenses/odbl/1-0/">
+ <bounds minlat="-6.9080600" minlon="107.6034400" maxlat="-6.9060700" maxlon="107.6055400"/>
+ <node id="25433683" visible="true" version="3" changeset="839915" timestamp="2009-03-21T14:18:48Z" user="adhitya" uid="7748" lat="-6.9067659" lon="107.5989458"/>
+ <node id="25433684" visible="true" version="4" changeset="11905099" timestamp="2012-06-15T14:05:57Z" user="andryono" uid="643030" lat="-6.9068381" lon="107.5995616"/>
+ <node id="25434270" visible="true" version="2" changeset="839915" timestamp="2009-03-21T14:19:30Z" user="adhitya" uid="7748" lat="-6.9126915" lon="107.6039614"/>
+ <node id="25500626" visible="true" version="4" changeset="29186819" timestamp="2015-03-01T21:42:54Z" user="gnocin" uid="2526082" lat="-6.9070329" lon="107.6019401">
+  <tag k="bus" v="yes"/>
+  <tag k="highway" v="bus_stop"/>
+  <tag k="name" v="GOR Padjajaran"/>
+  <tag k="public_transport" v="stop_position"/>
+  <tag k="ref" v="GOR Padjajaran"/>
+ </node>
+ <node id="29392413" visible="true" version="3" changeset="839915" timestamp="2009-03-21T14:17:04Z" user="adhitya" uid="7748" lat="-6.9071747" lon="107.6039686"/>
+ <node id="29392419" visible="true" version="2" changeset="12485336" timestamp="2012-07-25T11:08:36Z" user="ArjanO" uid="38066" lat="-6.9097700" lon="107.6042174"/>
+ <node id="29392488" visible="true" version="3" changeset="27915880" timestamp="2015-01-04T17:57:25Z" user="isonpurba" uid="2552445" lat="-6.9061296" lon="107.6044079"/>
+ <node id="32529146" visible="true" version="3" changeset="839915" timestamp="2009-03-21T14:16:03Z" user="adhitya" uid="7748" lat="-6.9071333" lon="107.6033567">
+  <tag k="created_by" v="JOSM"/>
+ </node>
+ <node id="364365012" visible="true" version="1" changeset="839915" timestamp="2009-03-21T14:07:19Z" user="adhitya" uid="7748" lat="-6.9069591" lon="107.6008710"/>
+ <node id="1706564155" visible="true" version="1" changeset="11220464" timestamp="2012-04-08T02:49:00Z" user="andryono" uid="643030" lat="-6.9070955" lon="107.6028239"/>
+ <node id="1706564168" visible="true" version="1" changeset="11220464" timestamp="2012-04-08T02:49:01Z" user="andryono" uid="643030" lat="-6.9070663" lon="107.6024111"/>
+ <node id="1798131551" visible="true" version="2" changeset="14069373" timestamp="2012-11-28T07:04:06Z" user="dadan dany dipoera" uid="922816" lat="-6.9071543" lon="107.6053648"/>
+ <node id="1798131575" visible="true" version="2" changeset="14069373" timestamp="2012-11-28T07:04:07Z" user="dadan dany dipoera" uid="922816" lat="-6.9071540" lon="107.6055713"/>
+ <node id="1837514691" visible="true" version="1" changeset="12485336" timestamp="2012-07-25T11:08:36Z" user="ArjanO" uid="38066" lat="-6.9088263" lon="107.6044893"/>
+ <node id="1837514692" visible="true" version="1" changeset="12485336" timestamp="2012-07-25T11:08:36Z" user="ArjanO" uid="38066" lat="-6.9092896" lon="107.6043676"/>
+ <node id="2962096536" visible="true" version="1" changeset="24131990" timestamp="2014-07-14T03:03:32Z" user="brambanan" uid="2092576" lat="-6.9047363" lon="107.6043991"/>
+ <node id="3277430504" visible="true" version="1" changeset="28004531" timestamp="2015-01-08T19:49:23Z" user="isonpurba" uid="2552445" lat="-6.9119091" lon="107.6040300"/>
+ <node id="3376669069" visible="true" version="2" changeset="29163224" timestamp="2015-02-28T19:06:35Z" user="gnocin" uid="2526082" lat="-6.9071711" lon="107.6044350">
+  <tag k="bus" v="yes"/>
+  <tag k="highway" v="bus_stop"/>
+  <tag k="name" v="Kimia Farma/Cicendo"/>
+  <tag k="public_transport" v="stop_position"/>
+  <tag k="ref" v="Kimia Farma/Cicendo"/>
+ </node>
+ <way id="4251274" visible="true" version="7" changeset="32042960" timestamp="2015-06-18T05:29:20Z" user="Serpico" uid="11618">
+  <nd ref="3376669069"/>
+  <nd ref="1837514691"/>
+  <nd ref="1837514692"/>
+  <nd ref="29392419"/>
+  <nd ref="3277430504"/>
+  <nd ref="25434270"/>
+  <tag k="avgspeed" v="30"/>
+  <tag k="highway" v="primary"/>
+  <tag k="name" v="Jalan Cicendo"/>
+  <tag k="oneway" v="yes"/>
+ </way>
+ <way id="4567490" visible="true" version="10" changeset="32042960" timestamp="2015-06-18T05:29:20Z" user="Serpico" uid="11618">
+  <nd ref="3376669069"/>
+  <nd ref="29392488"/>
+  <nd ref="2962096536"/>
+  <tag k="avgspeed" v="30"/>
+  <tag k="highway" v="primary"/>
+  <tag k="name" v="Jalan Cihampelas"/>
+  <tag k="oneway" v="yes"/>
+ </way>
+ <way id="168569217" visible="true" version="4" changeset="39373846" timestamp="2016-05-17T11:04:56Z" user="mgeh" uid="1819255">
+  <nd ref="1798131575"/>
+  <nd ref="1798131551"/>
+  <tag k="avgspeed" v="30"/>
+  <tag k="bicycle" v="yes"/>
+  <tag k="bridge" v="yes"/>
+  <tag k="foot" v="yes"/>
+  <tag k="highway" v="primary"/>
+  <tag k="oneway" v="yes"/>
+ </way>
+ <way id="319068174" visible="true" version="3" changeset="32042960" timestamp="2015-06-18T05:29:23Z" user="Serpico" uid="11618">
+  <nd ref="25433683"/>
+  <nd ref="25433684"/>
+  <nd ref="364365012"/>
+  <nd ref="25500626"/>
+  <nd ref="1706564168"/>
+  <nd ref="1706564155"/>
+  <nd ref="32529146"/>
+  <nd ref="29392413"/>
+  <nd ref="3376669069"/>
+  <tag k="avgspeed" v="30"/>
+  <tag k="bicycle" v="yes"/>
+  <tag k="foot" v="yes"/>
+  <tag k="highway" v="primary"/>
+  <tag k="name" v="Jalan Pajajaran"/>
+  <tag k="oneway" v="yes"/>
+ </way>
+ <way id="418942771" visible="true" version="1" changeset="39373846" timestamp="2016-05-17T11:04:56Z" user="mgeh" uid="1819255">
+  <nd ref="1798131551"/>
+  <nd ref="3376669069"/>
+  <tag k="avgspeed" v="30"/>
+  <tag k="bicycle" v="yes"/>
+  <tag k="foot" v="yes"/>
+  <tag k="highway" v="primary"/>
+  <tag k="oneway" v="yes"/>
+ </way>
+</osm>
