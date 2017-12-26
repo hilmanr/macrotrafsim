@@ -1,10 +1,9 @@
 var express = require('express'),
 	app = express(),
-	port = process.env.PORT || 3000,
+	port = process.env.PORT || 3000;
 	// mongoose = require('mongoose'),
-	Task = require('./api/models/directionModel'),
-	bodyParser = require('body-parser'),
-    serveStatic = require('serve-static');
+	// bodyParser = require('body-parser'),
+    // serveStatic = require('serve-static');
 
 app.use(function (req, res, next) {
 
@@ -25,11 +24,6 @@ app.use(function (req, res, next) {
     next();
 });
 
-// mongoose.Promise = global.Promise;
-// mongoose.connect('mongodb://localhost/directiondb');
-
-app.use(bodyParser.urlencoded({extended:true}));
-app.use(bodyParser.json());
 app.use(express.static('public'));
 
 var routes = require('./api/routes/directionRoute');
