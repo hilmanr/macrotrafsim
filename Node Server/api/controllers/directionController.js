@@ -226,7 +226,7 @@ exports.mapPreprocess = function(req,res) {
 				
 				//sekarang filter nodenya
 				process.stdout.write("Filter relevant node");
-				console.log("Node Count: "+nodes.length);
+				console.log("\nNode Count: "+nodes.length);
 				for (var i=0; i<nodes.length; i++) {
 					var node = nodes[i];
 					var ways = mapXML.documentElement.getElementsByTagName("way");
@@ -283,15 +283,6 @@ exports.mapPreprocess = function(req,res) {
 	});
 }
 
-// exports.mapPreprocess = function(req,res) {
-// 	fs.readFile("./data/map_preprocessed_itb.osm", function(err,data) {
-// 		console.log("Read preprocessed map");
-// 		if (!err) {
-// 			var mapData = data.toString();
-// 			res.send(mapData);
-// 		}
-// 	});
-// }
 
 exports.getProcessedMap = function(req,res) {
 	fs.readFile("./data/map_preprocessed.osm", function(err,data) {

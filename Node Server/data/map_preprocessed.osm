@@ -1,30 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<osm version="0.6" generator="CGImap 0.6.0 (6239 thorn-02.openstreetmap.org)" copyright="OpenStreetMap and contributors" attribution="http://www.openstreetmap.org/copyright" license="http://opendatacommons.org/licenses/odbl/1-0/">
- <bounds minlat="-6.9080600" minlon="107.6034400" maxlat="-6.9060700" maxlon="107.6055400"/>
- <node id="25433683" visible="true" version="3" changeset="839915" timestamp="2009-03-21T14:18:48Z" user="adhitya" uid="7748" lat="-6.9067659" lon="107.5989458"/>
- <node id="25433684" visible="true" version="4" changeset="11905099" timestamp="2012-06-15T14:05:57Z" user="andryono" uid="643030" lat="-6.9068381" lon="107.5995616"/>
+<osm version="0.6" generator="CGImap 0.6.0 (22500 thorn-02.openstreetmap.org)" copyright="OpenStreetMap and contributors" attribution="http://www.openstreetmap.org/copyright" license="http://opendatacommons.org/licenses/odbl/1-0/">
+ <bounds minlat="-6.9143100" minlon="107.6032300" maxlat="-6.9115100" maxlon="107.6066500"/>
+ <node id="25434265" visible="true" version="5" changeset="27930552" timestamp="2015-01-05T11:37:38Z" user="isonpurba" uid="2552445" lat="-6.9147310" lon="107.6064838"/>
+ <node id="25434266" visible="true" version="4" changeset="32322910" timestamp="2015-07-01T04:57:16Z" user="madededy" uid="325814" lat="-6.9144957" lon="107.6046360"/>
+ <node id="25434267" visible="true" version="3" changeset="16202690" timestamp="2013-05-20T04:49:50Z" user="yc1ohe" uid="792179" lat="-6.9127574" lon="107.6047130"/>
  <node id="25434270" visible="true" version="2" changeset="839915" timestamp="2009-03-21T14:19:30Z" user="adhitya" uid="7748" lat="-6.9126915" lon="107.6039614"/>
- <node id="25500626" visible="true" version="4" changeset="29186819" timestamp="2015-03-01T21:42:54Z" user="gnocin" uid="2526082" lat="-6.9070329" lon="107.6019401">
+ <node id="29356230" visible="true" version="3" changeset="20081263" timestamp="2014-01-19T09:38:31Z" user="Irfan Muhammad" uid="646006" lat="-6.9124847" lon="107.6006597"/>
+ <node id="29356300" visible="true" version="3" changeset="20081263" timestamp="2014-01-19T09:38:31Z" user="Irfan Muhammad" uid="646006" lat="-6.9123850" lon="107.5989971"/>
+ <node id="29356368" visible="true" version="3" changeset="20081263" timestamp="2014-01-19T09:38:31Z" user="Irfan Muhammad" uid="646006" lat="-6.9124592" lon="107.6000082"/>
+ <node id="29392419" visible="true" version="2" changeset="12485336" timestamp="2012-07-25T11:08:36Z" user="ArjanO" uid="38066" lat="-6.9097700" lon="107.6042174"/>
+ <node id="293384756" visible="true" version="3" changeset="29186819" timestamp="2015-03-01T21:42:55Z" user="gnocin" uid="2526082" lat="-6.9125797" lon="107.6026537">
   <tag k="bus" v="yes"/>
   <tag k="highway" v="bus_stop"/>
-  <tag k="name" v="GOR Padjajaran"/>
+  <tag k="name" v="Stasiun KA Bandung (St. Hall) / Kebon Kawung"/>
   <tag k="public_transport" v="stop_position"/>
-  <tag k="ref" v="GOR Padjajaran"/>
+  <tag k="ref" v="Stasiun KA Bandung (St. Hall) / Kebon Kawung"/>
  </node>
- <node id="29392413" visible="true" version="3" changeset="839915" timestamp="2009-03-21T14:17:04Z" user="adhitya" uid="7748" lat="-6.9071747" lon="107.6039686"/>
- <node id="29392419" visible="true" version="2" changeset="12485336" timestamp="2012-07-25T11:08:36Z" user="ArjanO" uid="38066" lat="-6.9097700" lon="107.6042174"/>
- <node id="29392488" visible="true" version="3" changeset="27915880" timestamp="2015-01-04T17:57:25Z" user="isonpurba" uid="2552445" lat="-6.9061296" lon="107.6044079"/>
- <node id="32529146" visible="true" version="3" changeset="839915" timestamp="2009-03-21T14:16:03Z" user="adhitya" uid="7748" lat="-6.9071333" lon="107.6033567">
-  <tag k="created_by" v="JOSM"/>
- </node>
- <node id="364365012" visible="true" version="1" changeset="839915" timestamp="2009-03-21T14:07:19Z" user="adhitya" uid="7748" lat="-6.9069591" lon="107.6008710"/>
- <node id="1706564155" visible="true" version="1" changeset="11220464" timestamp="2012-04-08T02:49:00Z" user="andryono" uid="643030" lat="-6.9070955" lon="107.6028239"/>
- <node id="1706564168" visible="true" version="1" changeset="11220464" timestamp="2012-04-08T02:49:01Z" user="andryono" uid="643030" lat="-6.9070663" lon="107.6024111"/>
- <node id="1798131551" visible="true" version="2" changeset="14069373" timestamp="2012-11-28T07:04:06Z" user="dadan dany dipoera" uid="922816" lat="-6.9071543" lon="107.6053648"/>
- <node id="1798131575" visible="true" version="2" changeset="14069373" timestamp="2012-11-28T07:04:07Z" user="dadan dany dipoera" uid="922816" lat="-6.9071540" lon="107.6055713"/>
+ <node id="293384775" visible="true" version="2" changeset="839915" timestamp="2009-03-21T14:17:49Z" user="adhitya" uid="7748" lat="-6.9125737" lon="107.6024711"/>
+ <node id="364363777" visible="true" version="4" changeset="27930552" timestamp="2015-01-05T11:37:38Z" user="isonpurba" uid="2552445" lat="-6.9147550" lon="107.6066770"/>
+ <node id="364363779" visible="true" version="4" changeset="27930552" timestamp="2015-01-05T11:37:38Z" user="isonpurba" uid="2552445" lat="-6.9147390" lon="107.6068352"/>
+ <node id="364363780" visible="true" version="5" changeset="27930552" timestamp="2015-01-05T11:37:38Z" user="isonpurba" uid="2552445" lat="-6.9146727" lon="107.6069261"/>
+ <node id="364363786" visible="true" version="4" changeset="27930150" timestamp="2015-01-05T11:18:54Z" user="isonpurba" uid="2552445" lat="-6.9145964" lon="107.6069696"/>
+ <node id="1014722757" visible="true" version="2" changeset="20081263" timestamp="2014-01-19T09:38:31Z" user="Irfan Muhammad" uid="646006" lat="-6.9125357" lon="107.6015843"/>
+ <node id="1014722882" visible="true" version="1" changeset="6505516" timestamp="2010-12-01T16:29:14Z" user="ArjanO" uid="38066" lat="-6.9126110" lon="107.6030692"/>
+ <node id="1158819792" visible="true" version="1" changeset="7320593" timestamp="2011-02-18T09:21:42Z" user="ArjanO" uid="38066" lat="-6.9125712" lon="107.6023744"/>
+ <node id="1212690946" visible="true" version="2" changeset="16254763" timestamp="2013-05-23T16:35:03Z" user="dadan dany dipoera" uid="922816" lat="-6.9143974" lon="107.6045784"/>
  <node id="1837514691" visible="true" version="1" changeset="12485336" timestamp="2012-07-25T11:08:36Z" user="ArjanO" uid="38066" lat="-6.9088263" lon="107.6044893"/>
  <node id="1837514692" visible="true" version="1" changeset="12485336" timestamp="2012-07-25T11:08:36Z" user="ArjanO" uid="38066" lat="-6.9092896" lon="107.6043676"/>
- <node id="2962096536" visible="true" version="1" changeset="24131990" timestamp="2014-07-14T03:03:32Z" user="brambanan" uid="2092576" lat="-6.9047363" lon="107.6043991"/>
+ <node id="1916791843" visible="true" version="3" changeset="16254763" timestamp="2013-05-23T16:35:09Z" user="dadan dany dipoera" uid="922816" lat="-6.9127354" lon="107.6046467"/>
+ <node id="1916791848" visible="true" version="3" changeset="40204241" timestamp="2016-06-22T12:40:37Z" user="deSoleh" uid="4155641" lat="-6.9136244" lon="107.6046031"/>
+ <node id="2041524725" visible="true" version="2" changeset="18726218" timestamp="2013-11-05T09:40:03Z" user="ynov" uid="1794631" lat="-6.9103689" lon="107.6057629"/>
+ <node id="2041524727" visible="true" version="2" changeset="28004531" timestamp="2015-01-08T19:49:24Z" user="isonpurba" uid="2552445" lat="-6.9104207" lon="107.6057034"/>
+ <node id="2041524730" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9105986" lon="107.6057723"/>
+ <node id="2041524731" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9109607" lon="107.6059598"/>
+ <node id="2041524732" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9111968" lon="107.6060838"/>
+ <node id="2041524733" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9114275" lon="107.6061767"/>
+ <node id="2041524734" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9115434" lon="107.6061964"/>
+ <node id="2041524735" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9116664" lon="107.6061806"/>
+ <node id="2041524736" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9119104" lon="107.6061519"/>
+ <node id="2041524737" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9123596" lon="107.6060802"/>
+ <node id="2041524738" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9123754" lon="107.6057623"/>
+ <node id="2041524739" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9123846" lon="107.6053829"/>
+ <node id="2041524740" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9125053" lon="107.6053706"/>
+ <node id="2041524741" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9126338" lon="107.6053470"/>
+ <node id="2041524742" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9127233" lon="107.6053346"/>
+ <node id="2041524743" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9127579" lon="107.6047186"/>
+ <node id="2041524744" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9127613" lon="107.6048132"/>
+ <node id="2041524745" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9127624" lon="107.6052479"/>
+ <node id="2041524746" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9127680" lon="107.6051071"/>
+ <node id="2041524747" visible="true" version="1" changeset="14095095" timestamp="2012-11-30T06:25:05Z" user="dadan dany dipoera" uid="922816" lat="-6.9127702" lon="107.6049314"/>
+ <node id="2628264112" visible="true" version="2" changeset="29206748" timestamp="2015-03-02T19:38:39Z" user="gnocin" uid="2526082" lat="-6.9123826" lon="107.5980219"/>
+ <node id="2628264152" visible="true" version="1" changeset="20081263" timestamp="2014-01-19T09:38:29Z" user="Irfan Muhammad" uid="646006" lat="-6.9126586" lon="107.6035962"/>
+ <node id="2628264159" visible="true" version="1" changeset="20081263" timestamp="2014-01-19T09:38:29Z" user="Irfan Muhammad" uid="646006" lat="-6.9126266" lon="107.6032421"/>
  <node id="3277430504" visible="true" version="1" changeset="28004531" timestamp="2015-01-08T19:49:23Z" user="isonpurba" uid="2552445" lat="-6.9119091" lon="107.6040300"/>
  <node id="3376669069" visible="true" version="2" changeset="29163224" timestamp="2015-02-28T19:06:35Z" user="gnocin" uid="2526082" lat="-6.9071711" lon="107.6044350">
   <tag k="bus" v="yes"/>
@@ -33,6 +60,9 @@
   <tag k="public_transport" v="stop_position"/>
   <tag k="ref" v="Kimia Farma/Cicendo"/>
  </node>
+ <node id="3628110745" visible="true" version="1" changeset="32322910" timestamp="2015-07-01T04:57:15Z" user="madededy" uid="325814" lat="-6.9144284" lon="107.6045815"/>
+ <node id="3628110746" visible="true" version="1" changeset="32322910" timestamp="2015-07-01T04:57:15Z" user="madededy" uid="325814" lat="-6.9144656" lon="107.6045983"/>
+ <node id="3628110747" visible="true" version="1" changeset="32322910" timestamp="2015-07-01T04:57:15Z" user="madededy" uid="325814" lat="-6.9145138" lon="107.6047052"/>
  <way id="4251274" visible="true" version="7" changeset="32042960" timestamp="2015-06-18T05:29:20Z" user="Serpico" uid="11618">
   <nd ref="3376669069"/>
   <nd ref="1837514691"/>
@@ -45,49 +75,71 @@
   <tag k="name" v="Jalan Cicendo"/>
   <tag k="oneway" v="yes"/>
  </way>
- <way id="4567490" visible="true" version="10" changeset="32042960" timestamp="2015-06-18T05:29:20Z" user="Serpico" uid="11618">
-  <nd ref="3376669069"/>
-  <nd ref="29392488"/>
-  <nd ref="2962096536"/>
+ <way id="4567655" visible="true" version="11" changeset="32042960" timestamp="2015-06-18T05:29:22Z" user="Serpico" uid="11618">
+  <nd ref="25434270"/>
+  <nd ref="2628264152"/>
+  <nd ref="2628264159"/>
+  <nd ref="1014722882"/>
+  <nd ref="293384756"/>
+  <nd ref="293384775"/>
+  <nd ref="1158819792"/>
+  <nd ref="1014722757"/>
+  <nd ref="29356230"/>
+  <nd ref="29356368"/>
+  <nd ref="29356300"/>
+  <nd ref="2628264112"/>
   <tag k="avgspeed" v="30"/>
   <tag k="highway" v="primary"/>
-  <tag k="name" v="Jalan Cihampelas"/>
+  <tag k="name" v="Jalan Kebon Kawung"/>
   <tag k="oneway" v="yes"/>
  </way>
- <way id="168569217" visible="true" version="4" changeset="39373846" timestamp="2016-05-17T11:04:56Z" user="mgeh" uid="1819255">
-  <nd ref="1798131575"/>
-  <nd ref="1798131551"/>
-  <tag k="avgspeed" v="30"/>
-  <tag k="bicycle" v="yes"/>
-  <tag k="bridge" v="yes"/>
-  <tag k="foot" v="yes"/>
-  <tag k="highway" v="primary"/>
-  <tag k="oneway" v="yes"/>
+ <way id="193626591" visible="true" version="6" changeset="32042390" timestamp="2015-06-18T04:26:31Z" user="Serpico" uid="11618">
+  <nd ref="25434270"/>
+  <nd ref="1916791843"/>
+  <tag k="highway" v="secondary_link"/>
+  <tag k="name" v="Jalan Aceh"/>
  </way>
- <way id="319068174" visible="true" version="3" changeset="32042960" timestamp="2015-06-18T05:29:23Z" user="Serpico" uid="11618">
-  <nd ref="25433683"/>
-  <nd ref="25433684"/>
-  <nd ref="364365012"/>
-  <nd ref="25500626"/>
-  <nd ref="1706564168"/>
-  <nd ref="1706564155"/>
-  <nd ref="32529146"/>
-  <nd ref="29392413"/>
-  <nd ref="3376669069"/>
-  <tag k="avgspeed" v="30"/>
-  <tag k="bicycle" v="yes"/>
-  <tag k="foot" v="yes"/>
-  <tag k="highway" v="primary"/>
-  <tag k="name" v="Jalan Pajajaran"/>
-  <tag k="oneway" v="yes"/>
+ <way id="318222724" visible="true" version="4" changeset="32322910" timestamp="2015-07-01T04:57:16Z" user="madededy" uid="325814">
+  <nd ref="1916791843"/>
+  <nd ref="25434267"/>
+  <nd ref="2041524743"/>
+  <nd ref="2041524744"/>
+  <nd ref="2041524747"/>
+  <nd ref="2041524746"/>
+  <nd ref="2041524745"/>
+  <nd ref="2041524742"/>
+  <nd ref="2041524741"/>
+  <nd ref="2041524740"/>
+  <nd ref="2041524739"/>
+  <nd ref="2041524738"/>
+  <nd ref="2041524737"/>
+  <nd ref="2041524736"/>
+  <nd ref="2041524735"/>
+  <nd ref="2041524734"/>
+  <nd ref="2041524733"/>
+  <nd ref="2041524732"/>
+  <nd ref="2041524731"/>
+  <nd ref="2041524730"/>
+  <nd ref="2041524727"/>
+  <nd ref="2041524725"/>
+  <tag k="highway" v="secondary"/>
+  <tag k="name" v="Jalan Kebon Sirih"/>
  </way>
- <way id="418942771" visible="true" version="1" changeset="39373846" timestamp="2016-05-17T11:04:56Z" user="mgeh" uid="1819255">
-  <nd ref="1798131551"/>
-  <nd ref="3376669069"/>
-  <tag k="avgspeed" v="30"/>
-  <tag k="bicycle" v="yes"/>
-  <tag k="foot" v="yes"/>
-  <tag k="highway" v="primary"/>
-  <tag k="oneway" v="yes"/>
+ <way id="331559927" visible="true" version="3" changeset="32322910" timestamp="2015-07-01T04:57:17Z" user="madededy" uid="325814">
+  <nd ref="1916791843"/>
+  <nd ref="1916791848"/>
+  <nd ref="1212690946"/>
+  <nd ref="3628110745"/>
+  <nd ref="3628110746"/>
+  <nd ref="25434266"/>
+  <nd ref="3628110747"/>
+  <nd ref="25434265"/>
+  <nd ref="364363777"/>
+  <nd ref="364363779"/>
+  <nd ref="364363780"/>
+  <nd ref="364363786"/>
+  <tag k="avgspeed" v="25"/>
+  <tag k="highway" v="secondary"/>
+  <tag k="name" v="Jalan Kebon Jukut"/>
  </way>
 </osm>

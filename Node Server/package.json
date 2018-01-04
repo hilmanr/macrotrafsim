@@ -1,7 +1,7 @@
 {
-  "name": "tutorial_node_js_restful",
+  "name": "Macroscopic Road Traffic Simulator Web",
   "version": "1.0.0",
-  "description": "Belajar Node JS RESTful untuk backend sistem tesis",
+  "description": "Tesis simulator lalu lintas",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
