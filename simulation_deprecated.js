@@ -510,3 +510,161 @@ function runSimulation(xml) {
 		}
 	}, simulationFrame);
 }
+
+function createInterCell(node) {
+	/*
+	############################
+	KHUSUS UNTUK INTERSECT CELLS
+	############################
+	*/
+	var cell = {
+		node : node,
+		outCells : [], //.nextCell cell yang akan menerima transfer, bentuk linked list
+		inCells : [],
+		smallestQ : 1000, //nilai Q terkecil dari outCells inisialisasi, nanti akan berubah ketika disambungkan
+		isIntersect : true,
+		isFinal : false,
+		isUpdated : true,
+		R : 0, //Receive Count, jumlah yang akan diterima, dynamic
+		S : 0, //Send Count, jumlah yang akan ditransfer, dynamic
+		altR : 0,
+		altS : 0,
+		// send : function() {
+		// 	var sumEmptySpace = 0; //jumlah tempat kosong
+		// 	var sumQ = 0; //jumlah flow total
+
+		// 	for (var i = 0; i < this.inCells.length; i++) {
+		// 		this.R += this.inCells[i].n; //diisi occupancynya	
+		// 	}
+
+		// 	//Jumlah inputnya ditampung di variabel R
+		// 	for (var i = 0; i < this.outCells.length; i++) {
+		// 		sumEmptySpace += (this.outCells[i].N-this.outCells[i].n);
+		// 		sumQ += this.outCells[i].Q;
+		// 	}
+
+		// 	this.S = Math.min(sumEmptySpace, sumQ, this.R);
+		// 	//this.R artinya sisa yang tidak di transmisikan
+		// 	//Sekarang distribute ke masing-masing.nextCellCell, sementara distribusi rata dulu saja
+		// 	//Distribute nanti disesuaikan dengan data traffic
+		// 	/*
+		// 	###################################
+
+		// 	DISTRIBUTE KE SEL-SEL PENERIMA
+
+		// 	###################################
+		// 	*/
+		// 	var totalSent = this.S;
+		// 	var defDist = Math.floor(totalSent/this.outCells.length);//Ini gimana?
+		// 	if (defDist > this.smallestQ) {
+		// 		defDist = this.smallestQ;
+		// 	} //Kalau defDist == smallestQ, ada kemungkinan distribute beberapa kali
+		// 	//Kalau defDist == TotalSent/cells.length cuku distribusi sekali
+
+		// 	for (var i = 0; i < this.outCells.length; i++) { //distribusi rata dulu
+		// 		this.outCells[i].R += defDist;
+		// 		totalSent-= defDist;
+		// 	} //Kemungkinan masih ada sisa
+
+		// 	//Cek dulu kalau ada sisa
+		// 	var j = 0;
+		// 	while (totalSent>0) {
+		// 		var remainCap = this.outCells[j].N-this.outCells[j].R-this.outCells.n; //pakai emptySpace instead of Q, karena emptySpace < Q, case persimipangan jalan Q == N
+		// 		if (remainCap > 0) { //Masih bisa tampung
+		// 			if (remainCap >= totalSent) { //cek bisa tampung semua atau tidak
+		// 				this.outCells[j].R += totalSent;
+		// 				totalSent -= totalSent;
+		// 			} else { //Cuma bisa nampung sebagian, totalSent lebih besar dari yang bisa ditampung
+		// 				this.outCells[j].R += remainCap;
+		// 				totalSent -= remainCap;
+		// 			}
+		// 		}
+		// 		j++;
+		// 		if (j == this.outCells.length) { //diulang ke index awal
+		// 			j = 0;
+		// 		}
+		// 	} //Pastikan urutan sel sesuai dengan prioritas dari kondisi lalu lintas
+
+			
+		// 	###################################
+
+		// 	DISTRIBUTE KE SEL-SEL PENGIRIM
+
+		// 	###################################
+			
+		// 	var totalRec = this.S;
+		// 	var defRecDist = Math.floor(totalRec/this.inCells.length);//Ini gimana?
+		// 	var smallestN = 1000;
+		// 	for (var i = 0; i < this.inCells.length; i++) {
+		// 		if (this.inCells[i].n < smallestN) {
+		// 			smallestN = this.inCells[i].n;
+		// 		}
+		// 	}
+
+		// 	if (defRecDist > this.smallestN) {
+		// 		defRecDist = this.smallestN;
+		// 	} //Kalau defDist == smallestN, ada kemungkinan distribute beberapa kali
+		// 	//Kalau defDist == TotalSent/cells.length cukup distribusi sekali
+
+		// 	for (var i = 0; i < this.inCells.length; i++) { //distribusi rata dulu
+		// 		this.inCells[i].S += defRecDist;
+		// 		totalRec -= defRecDist;
+		// 	} //Kemungkinan masih ada sisa
+
+		// 	//Cek dulu kalau ada sisa
+		// 	var k = 0;
+		// 	while (totalRec>0) {
+		// 		var remainN = this.inCells[k].n-this.inCells[k].S; //cek masih ada sisa kendaraan atau tidak, setelah didistribusi rata sebelumnya
+		// 		if (remainN > 0) { //Masih bisa tampung
+		// 			if (remainN >= totalRec) { //cek sisa kendaraan masih banyak
+		// 				this.inCells[k].S += totalRec; //Masih ada sisa kendaraan antre
+		// 				totalRec -= totalRec;
+		// 			} else { //Cuma bisa nampung sebagian, totalSent lebih besar dari yang bisa ditampung
+		// 				this.inCells[k].S += remainN; //Kendaraan dari sudah habis dikirim
+		// 				totalRec -= remainN;
+		// 			}
+		// 		}
+		// 		k++;
+		// 		if (k == this.inCells.length) { //diulang ke index awal
+		// 			k = 0;
+		// 		}
+		// 	} //Pastikan urutan sel sesuai dengan prioritas dari kondisi lalu lintas
+		// 	/*
+		// 	##################################################################################
+		// 	SEND PASTI BISA MASUK KARENA BERDASARKAN MINIMUM TEMPAT KOSONG.nextCell CELL
+		// 	TETAPI,
+		// 	RECEIVE BELUM TENTU BISA MASUK DI INTERSECT CELL,
+		// 	KARENA JUMLAH TOTAL CELL MASUK DENGAN JUMLAH TOTAL KAPASITAS CELL KELUAR BISA BEDA
+		// 	CELL MASUK DAN CELL KELUAR BERSIFAT AGREGAT
+		// 	##################################################################################
+		// 	*/
+		// /*
+		// ############################
+		// KHUSUS UNTUK INTERSECT CELLS
+		// ############################
+		// */
+		// },
+		getStat: function() { //Update status persimpangan apakah ready untuk set jumlah kendaraan untuk ditransmisikan
+			var stat = true;
+			var i = 0;
+			while (stat && i<outCells.length) {
+				stat = stat && outCells[i];
+				i++;
+			}
+			this.isFinal = stat;
+			return stat;
+		},
+		send: function() { //Conceptnya traversal tree depth first, hanya dilakukan oleh intersect yang final
+			if (this.isFinal) { //Outcells nilainya sudah fix semua
+				var sumReceive = 0;
+				for (var i = 0; i < this.outCells.length; i++) {
+					sumReceive+= outCells[i].receiveCap;
+				}
+
+			}
+
+		}
+
+	}
+	return cell;
+}

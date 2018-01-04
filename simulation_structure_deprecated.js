@@ -5,6 +5,90 @@ var nodes;
 
 //Menjalankan simulasi menggunakan timer
 
+function validSource(node,returnCell,custom) {
+	var sourceValid = false;
+	var validCells = [];
+	var totalWays = node.inWays.length + node.outWays.length;
+	if (custom) { //Semua cell bisa jadi source
+		for (var j = 0; j < node.outWays.length; j++) { //default cell pertama di outWays jadi source
+			validCells.push(node.outWays[j].segments[0].defaultCells[0]);
+		}
+
+		for (var j = 0; j < node.inWays.length; j++) { //alternate cell pertama di inWays jadi source
+			if (!node.inWays[j].tags["oneway"]) {
+				validCells.push(node.inWays[j].segments[node.inWays[j].segments.length-1].alternateCells[0]);
+			}
+		}
+		sourceValid = true;
+	} else { //hanya source outOfBound yang bisa jadi source, ditambah syarat2 tertentu
+		if (outOfBound(node)) {
+			if (totalWays <= 2) {
+				if (totalWays == 2) {
+					if (node.inWays.length == 1 && node.outWays.length == 1) {
+						if (!node.inWays[0].tags["oneway"] && node.outWays[0].tags["oneway"]) {
+							if (returnCell) {
+								validCells.push(node.inWays[0].segments[node.inWays[0].segments.length-1].alternateCells[0]);
+								validCells.push(node.outWays[0].segments[0].defaultCells[0]);	
+							}
+							sourceValid = true;
+						}
+					} else if (node.inWays.length == 2) {
+						if (!node.inWays[0].tags["oneway"] && node.inWays[1].tags["oneway"]) {
+							if (returnCell) {
+								validCells.push(node.inWays[0].segments[node.inWays[0].segments.length-1].alternateCells[0]);		
+							}
+							sourceValid = true;
+						} else if (node.inWays[0].tags["oneway"] && !node.inWays[1].tags["oneway"]) {
+							if (returnCell) {
+								validCells.push(node.inWays[1].segments[node.inWays[1].segments.length-1].alternateCells[0]);	
+							}
+							sourceValid = true;
+						}
+					} else if (node.outWays.length == 2) { //out semua, selama tidak dua arah dua-duanya, tetap jadi source
+						if (!(node.outWays[0].tags["oneway"] && node.outWays[1].tags["oneway"])) {
+							if (returnCell) {
+								validCells.push(node.outWays[0].segments[0].defaultCells[0]);
+								validCells.push(node.outWays[1].segments[0].defaultCells[0]);	
+							}
+							sourceValid = true;
+						}
+					}
+				} else { //Hanya ada 1 jalan
+					if (node.inWays.length == 1) {
+						if (!node.inWays[0].tags["oneway"]) { //Kalau misal 1 jalan tapi dua ARAH
+							if (returnCell) {
+								validCells.push(node.inWays[0].segments[node.inWays[0].segments.length-1].alternateCells[0]);
+							}
+							sourceValid = true;
+						}					
+					} else if (node.outWays.length == 1) {
+						if (returnCell) {
+							validCells.push(node.outWays[0].segments[0].defaultCells[0]);
+						}
+						sourceValid = true;
+					}
+				}
+			} else { //nodes lebih dari dua in dan out ways
+				
+				if (returnCell) {
+					for (var j = 0; j < node.outWays.length; j++) { //default cell pertama di outWays jadi source
+						validCells.push(node.outWays[j].segments[0].defaultCells[0]);
+					}
+
+					for (var j = 0; j < node.inWays.length; j++) { //alternate cell pertama di inWays jadi source
+						if (!node.inWays[j].tags["oneway"]) {
+							validCells.push(node.inWays[j].segments[node.inWays[j].segments.length-1].alternateCells[0]);
+						}
+					}
+				}
+				sourceValid = true;	
+			}
+		}
+	}
+	var ret = {valid: sourceValid, cells: validCells};
+	return ret;
+}
+
 function runSimulation(xml) {
 	//Jalankan originNodes untuk menentukan nodes yang akan menghasilkan kendaraan
 	//Buat struktur data untuk jalan dan nodesnya
@@ -335,4 +419,55 @@ function runSimulationB(xml) {
 
 function createSimulation(xml) {
 	alert("createSimulation");
+}
+
+
+function getSourceNodes() {
+	var markers = [];
+	var sourceNodes = [];
+	// alert("Enter getSourceNodes");
+	for (var idx in nodes) {
+		var node = nodes[idx];
+		if ((node.inWays.length + node.outWays.length) == 1) { //artinya sink/source, tapi belum tahu
+			if (node.isSource) { //cari source node
+				sourceNodes.push(node);
+				node.marker = L.marker(node.latLng).addTo(mymap);
+				node.marker.bindPopup("",{closeOnClick: false, autoClose: false, autoPan: false});
+				markers.push(node.marker);	
+				sourceCells = sourceCells.concat(findCells(node.id));
+				sourceNodes.push(node);
+			}
+		}
+	}
+	var result = [];
+	result.push(sourceNodes);
+	result.push(markers);
+	return result;
+}
+
+var sourceNodeMarker = {};
+function setSource(latLng) {
+	alert("Set Source Cells");
+	var nodeId = getNearestNode(latLng);
+	sourceCells = sourceCells.concat(findCells(nodeId));
+	sourceNodes.push(nodes[nodeId]);
+}
+
+function getSinkNodes() {
+	var markers = [];
+	var sinkNodes = [];
+	for (var idx in nodes) {
+		var node = nodes[idx];
+		if ((node.inWays.length + node.outWays.length) == 1) { //artinya sink/source, tapi belum tahu
+			if (node.isSink) { //cari source node
+				sinkNodes.push(node);
+				node.marker = L.popup({closeOnClick: false, autoClose: false}).setLatLng(node.latLng).setContent("Sink Nodes"); 
+				markers.push(L.marker(node.latLng).bindPopup("Sink Nodes"));	
+			}
+		}
+	}
+	var result = [];
+	result.push(sinkNodes);
+	result.push(markers);
+	return result;
 }
