@@ -9,13 +9,14 @@ header('Access-Control-Allow-Origin: *');
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"
   integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=="
   crossorigin=""/>
+  <link rel="stylesheet" type="text/css" href="jquery.loading.css">
 </head>
 <body>
 <div class="w3-row">
 	<div class="w3-quarter w3-padding">
 		<h4>Set Boundary</h4>
 		<div>
-			<input type="text" id="boundary" value="107.60323,-6.91431,107.60665,-6.91151" placeholder="left,bottom,right,top">
+			<input type="text" id="boundary" value="107.59797,-6.90644,107.60401,-6.90271" placeholder="left,bottom,right,top">
 		</div>
 		<h4>Clock Tick Duration</h4>
 		<div>
@@ -27,15 +28,19 @@ header('Access-Control-Allow-Origin: *');
 		</div>
 		<h4>Vehicle Generate</h4>
 		<div>
-			<input type="number" value="10" id="vehicleGen" placeholder="Jumlah kendaraan dibangkitkan">
+			<input type="number" value="1" id="vehicleGen" placeholder="Jumlah kendaraan dibangkitkan">
 			<br>
 			<input type="checkbox" id="setDefaultSource" value="setDefaultOK" checked> Include default source nodes (node di ujung batas peta)
-			<hr>
 		</div>
 		<h4>Simulation Speed</h4>
 		<div>
 			<input type="number" value="1" id="simV" placeholder="Kecepatan simulasi (detik)">
 		</div>
+		<h4>Simulation Clock</h4>
+		<h5>Detik-<span id="timer"></span></h5>
+		<hr>
+
+		
 		<div id="setMap" class="w3-button">Set Map</div>
 		<div id="getNearest" class="w3-button">Find Nearest Node Id</div>
 		<div id="setSource" class="w3-button">Set Source Node</div>
@@ -46,7 +51,7 @@ header('Access-Control-Allow-Origin: *');
 		<div id="getIntermediate" class="w3-button">Set Bottleneck Node</div>
 		<div id="runSim" class="w3-button">Run simulation</div>
 		<div id="closePopup" class="w3-button">Close Popup</div>
-		<h3 id="timer"></h3>
+
 		<div>
 			<h3>Road Traffic Network Summary</h3>
 			<p>Way Count: <span id="wayCount"></span></p>
@@ -61,9 +66,11 @@ header('Access-Control-Allow-Origin: *');
 
 </body>
 <script type='text/javascript' src='//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js'></script>
+<script type="text/javascript" src="jquery.loading.js"></script>
 <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"
   integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
   crossorigin=""></script>
+<script type="text/javascript" src="leaflet.polylineoffset.js"></script>  
 <script type="text/javascript" src="http://localhost:3000/simulation-structure.js"></script>
 
 <script type="text/javascript">
@@ -71,6 +78,7 @@ header('Access-Control-Allow-Origin: *');
 	var markerList = [];
 	var mymap = L.map('mapid');
 	var mapxml = null;
+	var initialLayer = {};
 </script>
 
 <script type="text/javascript" src="simulation.js"></script>
@@ -84,16 +92,21 @@ header('Access-Control-Allow-Origin: *');
 
 		//initial load
 		$.ajax({
-		  // url : "http://localhost:3000/mapPreprocess/"+boundary,
-		  url : "http://localhost:3000/getProcessedMap/",
+		  url : "http://localhost:3000/mapPreprocess/"+boundary,
+		  // url : "http://localhost:3000/getProcessedMap/",
 		  dataType: "xml",
 		  success: function (xml) {
 		  	mapxml = xml;
-		    var layer = new L.OSM.DataLayer(xml).addTo(mymap); //addTo di leaflet-osm.js akan panggil add Data, selanjutnya buildFeatures() untuk render
-		    mymap.fitBounds(layer.getBounds());
-		    // alert("fitBound berhasil");
+		    initialLayer = new L.OSM.DataLayer(xml).addTo(mymap); //addTo di leaflet-osm.js akan panggil add Data, selanjutnya buildFeatures() untuk render
+		    mymap.fitBounds(initialLayer.getBounds());
+		    mymap.removeLayer(initialLayer);
+		    //bound variabel global di simulation-structure.js
+		    L.rectangle(bound.latLngBounds).addTo(mymap);
+			createWaySegments(parseInt($("#clockTick").val()), parseInt($("#vLength").val()));
+			drawNodeCircleMarkers();
+			closeAllSegmentPopup();
+			$('body').loading("stop");
 		  },
-		  async: false
 		});
 	}
 
@@ -116,8 +129,9 @@ header('Access-Control-Allow-Origin: *');
 	var createNodesStat = false;
 
 	$("#setMap").on("click", function() {
-		var bound = $("#boundary").val();
-		setMap(bound);
+		$('body').loading();
+		var boundVal = $("#boundary").val();
+		setMap(boundVal);
 	});
 
 	$("#getNearest").on("click", function() {
@@ -161,7 +175,7 @@ header('Access-Control-Allow-Origin: *');
 		} else {
 			$(".active").removeClass("w3-green");
 			$(".active").removeClass("active");
-			sourceMarkers = L.layerGroup(getSourceNodes()[1]);
+			sourceMarkers = L.layerGroup(getDefaultSourceNodes().markers);
 			sourceMarkers.addTo(mymap);
 			$(this).addClass("w3-green");	
 			$(this).addClass("active");
@@ -191,7 +205,8 @@ header('Access-Control-Allow-Origin: *');
 		} else {
 			$(".active").removeClass("w3-green");
 			$(".active").removeClass("active");
-			sourceMarkers = L.layerGroup(getIntersectionNodes()[1]);
+			// sourceMarkers.clearLayers();
+			sourceMarkers = L.layerGroup(getIntersectionNodes().markers);
 			sourceMarkers.addTo(mymap);
 			$(this).addClass("w3-green");	
 			$(this).addClass("active");
@@ -206,7 +221,8 @@ header('Access-Control-Allow-Origin: *');
 		} else {
 			$(".active").removeClass("w3-green");
 			$(".active").removeClass("active");
-			sourceMarkers = L.layerGroup(getIntermediateNodes()[1]);
+			// sourceMarkers.clearLayers();
+			sourceMarkers = L.layerGroup(getIntermediateNodes().markers);
 			sourceMarkers.addTo(mymap);
 			$(this).addClass("w3-green");	
 			$(this).addClass("active");
@@ -235,6 +251,7 @@ header('Access-Control-Allow-Origin: *');
 	mymap.on("click", function(e) {
 		//DEBUGGING PURPOSE
 		if (stat == 1) {
+			// sourceMarkers.clearLayers();
 			mymap.removeLayer(nearestNodeMarker);
 			showNearestNode(e.latlng);
 		} else if (stat == 2) {

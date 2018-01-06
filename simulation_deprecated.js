@@ -260,6 +260,245 @@ function createWays(xml) {
     // alert("Exit loop");
 }
 
+function createWaySegments() {
+	//Algoritma intersection dan intermediate
+	for (var i = 0; i < interNodes.length; i++) {
+		var node = interNodes[i];
+		if ((node.inWays.length + node.outWays.length) >= 2) { //Intersection atau intermediate cells
+			if ((node.inWays.length + node.outWays.length) == 2) { //Intermediate cells
+		 		//CASE Jalan 2 arah normal 
+				if (node.inWays.length == 1 && node.outWays.length == 1) { //1 in 1 out
+					// alert("this is here");
+					var inWaysLastSegment = node.inWays[0].segments[node.inWays[0].segments.length-1];
+					var inWaysLastCell = inWaysLastSegment.defaultCells[inWaysLastSegment.defaultCells.length-1];
+					var outWaysFirstSegment = node.outWays[0].segments[0];
+					var outWaysFirstCell = outWaysFirstSegment.defaultCells[0];
+					inWaysLastCell.nextCell = outWaysFirstCell;
+					outWaysFirstCell.prevCell = inWaysLastCell;
+
+					if (!node.inWays[0].tags["oneway"] && !node.outWays[0].tags["oneway"]) { //dua-duanya punya 2 arah
+						var inWaysLastSegment = node.inWays[0].segments[node.inWays[0].segments.length-1];
+						var inWaysFirstCell = inWaysLastSegment.alternateCells[0];
+						var outWaysFirstSegment = node.outWays[0].segments[0];
+						var outWaysLastCell = outWaysFirstSegment.alternateCells[outWaysFirstSegment.alternateCells.length-1];
+						outWaysLastCell.nextCell = inWaysFirstCell;
+						inWaysFirstCell.prevCell = outWaysLastCell;
+					}
+
+				} else if (node.inWays.length == 2)  {//CASE Jalan 2 arah in-in, PASTI 2 ARAH
+					if (!node.inWays[0].tags["oneway"] && !node.outWays[0].tags["oneway"]) { //dua-duanya punya 2 arah
+						var inWaysLastSegment1 = node.inWays[0].segments[node.inWays[0].segments.length-1];
+						var inWaysLastSegment2 = node.inWays[1].segments[node.inWays[0].segments.length-1];
+						var inWaysLastCell1 = inWaysLastSegment1.defaultCells[inWaysLastSegment1.defaultCells.length-1];
+						var inWaysFirstCell2 = inWaysLastSegment2.alternateCells[0];
+						inWaysLastCell1.nextCell = inWaysFirstCell2; //.nextCell ke alternate cell
+						inWaysFirstCell2.prevCell = inWaysLastCell1;
+						//HANDLING UNTUK ARAH SEBALIKNYA
+						var inWaysFirstCell1 = inWaysLastSegment1.alternateCells[0];
+						var inWaysLastCell2 = inWaysLastSegment2.defaultCells[inWaysLastSegment2.defaultCells.length-1];
+						inWaysLastCell2.nextCell = inWaysFirstCell1; //.nextCell ke alternate cell
+						inWaysFirstCell1.prevCell = inWaysLastCell2;
+					}
+				} else if (node.outWays.length == 2) {//CASE Jalan 2 arah out-out, PASTI 2 ARAH
+					if (!node.outWays[0].tags["oneway"] && !node.outWays[0].tags["oneway"]) { //dua-duanya punya 2 arah
+						var outWaysFirstSegment1 = node.outWays[0].segments[0];
+						var outWaysFirstSegment2 = node.outWays[1].segments[0];
+						var outWaysLastCell1 = outWaysFirstSegment1.alternateCells[outWaysFirstSegment1.alternate.length-1];
+						var outWaysFirstCell2 = outWaysFirstSegment2.defaultCells[0];
+						outWaysLastCell1.nextCell = outWaysFirstCell2; //.nextCell ke alternate cell
+						outWaysFirstCell2.prevCell = outWaysLastCell1;
+
+						var outWaysFirstCell1 = outWaysLastSegment1.defaultCells[0];
+						var outWaysLastCell2 = outWaysLastSegment2.alternateCells[outWaysLastSegment2.defaultCells.length-1];
+						outWaysLastCell2.nextCell = outWaysFirstCell1; //.nextCell ke alternate cell
+						outWaysFirstCell1.prevCell = outWaysLastCell2;
+					}
+				}
+		 		//JALAN TERHUBUNG DI INTERMEDIATE CELL, CELLS MASING-MASING JALAN SUDAH TERHUBUNG
+			} else { //Intersection Cells
+				/*
+				######################################################
+
+				PERSIMPANGAN JALAN
+
+				######################################################
+				*/
+				var interCell = createInterCell(node);
+				
+				//Akses way yang masuk
+				for (var j = 0; j < node.inWays.length; j++) {
+					var way = node.inWays[j];
+					var defaultLastSegment = way.segments[way.segments.length-1];
+					var defaultLastCell = defaultLastSegment.defaultCells[defaultLastSegment.defaultCells.length-1]; //Last cell
+					defaultLastCell.nextCell = interCell; //last cell bisa akses S dari intersection Cell
+					interCell.inCells.push(defaultLastCell);
+					if (!way.tags["oneway"]) { //ada dua arah
+						var alternateFirstCell = defaultLastSegment.alternateCells[0] //segmen pertama jadi yang terakhir k
+						alternateFirstCell.prevCell = interCell;
+						if (alternateFirstCell.Q > interCell.maxQ) {
+							interCell.maxQ = alternateFirstCell.Q;
+						}
+						interCell.outCells.push(alternateFirstCell);
+
+					}
+				}//Jalan masuk ke intercell sudah terhubung dengan intercell
+				//Akses way yang keluar
+				for (var j = 0; j < node.outWays.length; j++) {
+					var way = node.outWays[j]; //Jalan keluar dari interCell
+					var defaultFirstSegment = way.segments[0]; //segmen pertama yang terhubung dengan interCell
+					var defaultFirstCell = defaultFirstSegment.defaultCells[0]; //First cell
+					if (defaultFirstCell.Q > interCell.maxQ) {
+						interCell.maxQ = defaultFirstCell.Q;
+					}
+					defaultFirstCell.prevCell = interCell;
+					interCell.outCells.push(defaultFirstCell);
+					if (!way.tags["oneway"]) { //ada dua arah
+						var alternateLastCell = defaultFirstSegment.alternateCells[defaultFirstSegment.alternateCells.length-1] //segmen pertama jadi yang terakhir k
+						interCell.inCells.push(alternateLastCell);
+						alternateLastCell.nextCell = interCell;
+					}
+				}//Jalan keluar dari intercell sudah terhubung
+				
+				//Push ke repo pusat nanti update lebih mudah
+				interCells.push(interCell);
+
+			}
+
+		/*
+	##########################################
+	MEMBUAT INTERSECTION DAN INTERMEDIATE NODE
+	##########################################
+	*/
+	// for (var i = 0; i < interNodes.length; i++) {
+	// 	var node = interNodes[i];
+	// 	if ((node.inCells.length + node.outCells.length) >= 2) { //Intersection atau intermediate cells
+	// 		if (node.inCells.length == 1 && node.outCells.length == 1) {
+	// 			node.inCells[0].nextCell = node.outCells[0];
+	// 			node.outCells[0].prevCell = node.inCells[0];
+	// 			//2 in --> sink, 2 out --> source
+	// 		} else if (node.inCells.length + node.outCells.length > 2) {
+	// 			if (node.inCells.length == 2 && node.outCells.length == 2) { //intermediate jalan 2 arah
+
+
+	// 			}
+
+	// 		}
+
+
+
+
+	// 		if ((node.inCells.length + node.outWays.length) == 2) { //Intermediate cells
+	// 	 		//CASE Jalan 2 arah normal 
+	// 			if (node.inWays.length == 1 && node.outWays.length == 1) { //1 in 1 out
+	// 				// alert("this is here");
+	// 				var inWaysLastSegment = node.inWays[0].segments[node.inWays[0].segments.length-1];
+	// 				var inWaysLastCell = inWaysLastSegment.defaultCells[inWaysLastSegment.defaultCells.length-1];
+	// 				var outWaysFirstSegment = node.outWays[0].segments[0];
+	// 				var outWaysFirstCell = outWaysFirstSegment.defaultCells[0];
+	// 				inWaysLastCell.nextCell = outWaysFirstCell;
+	// 				outWaysFirstCell.prevCell = inWaysLastCell;
+
+	// 				if (!node.inWays[0].tags["oneway"] && !node.outWays[0].tags["oneway"]) { //dua-duanya punya 2 arah
+	// 					var inWaysLastSegment = node.inWays[0].segments[node.inWays[0].segments.length-1];
+	// 					var inWaysFirstCell = inWaysLastSegment.alternateCells[0];
+	// 					var outWaysFirstSegment = node.outWays[0].segments[0];
+	// 					var outWaysLastCell = outWaysFirstSegment.alternateCells[outWaysFirstSegment.alternateCells.length-1];
+	// 					outWaysLastCell.nextCell = inWaysFirstCell;
+	// 					inWaysFirstCell.prevCell = outWaysLastCell;
+	// 				}
+
+	// 			} else if (node.inWays.length == 2)  {//CASE Jalan 2 arah in-in, PASTI 2 ARAH
+	// 				if (!node.inWays[0].tags["oneway"] && !node.outWays[0].tags["oneway"]) { //dua-duanya punya 2 arah
+	// 					var inWaysLastSegment1 = node.inWays[0].segments[node.inWays[0].segments.length-1];
+	// 					var inWaysLastSegment2 = node.inWays[1].segments[node.inWays[0].segments.length-1];
+	// 					var inWaysLastCell1 = inWaysLastSegment1.defaultCells[inWaysLastSegment1.defaultCells.length-1];
+	// 					var inWaysFirstCell2 = inWaysLastSegment2.alternateCells[0];
+	// 					inWaysLastCell1.nextCell = inWaysFirstCell2; //.nextCell ke alternate cell
+	// 					inWaysFirstCell2.prevCell = inWaysLastCell1;
+	// 					//HANDLING UNTUK ARAH SEBALIKNYA
+	// 					var inWaysFirstCell1 = inWaysLastSegment1.alternateCells[0];
+	// 					var inWaysLastCell2 = inWaysLastSegment2.defaultCells[inWaysLastSegment2.defaultCells.length-1];
+	// 					inWaysLastCell2.nextCell = inWaysFirstCell1; //.nextCell ke alternate cell
+	// 					inWaysFirstCell1.prevCell = inWaysLastCell2;
+	// 				}
+	// 			} else if (node.outWays.length == 2) {//CASE Jalan 2 arah out-out, PASTI 2 ARAH
+	// 				if (!node.outWays[0].tags["oneway"] && !node.outWays[0].tags["oneway"]) { //dua-duanya punya 2 arah
+	// 					var outWaysFirstSegment1 = node.outWays[0].segments[0];
+	// 					var outWaysFirstSegment2 = node.outWays[1].segments[0];
+	// 					var outWaysLastCell1 = outWaysFirstSegment1.alternateCells[outWaysFirstSegment1.alternate.length-1];
+	// 					var outWaysFirstCell2 = outWaysFirstSegment2.defaultCells[0];
+	// 					outWaysLastCell1.nextCell = outWaysFirstCell2; //.nextCell ke alternate cell
+	// 					outWaysFirstCell2.prevCell = outWaysLastCell1;
+
+	// 					var outWaysFirstCell1 = outWaysLastSegment1.defaultCells[0];
+	// 					var outWaysLastCell2 = outWaysLastSegment2.alternateCells[outWaysLastSegment2.defaultCells.length-1];
+	// 					outWaysLastCell2.nextCell = outWaysFirstCell1; //.nextCell ke alternate cell
+	// 					outWaysFirstCell1.prevCell = outWaysLastCell2;
+	// 				}
+	// 			}
+	// 	 		//JALAN TERHUBUNG DI INTERMEDIATE CELL, CELLS MASING-MASING JALAN SUDAH TERHUBUNG
+	// 		} else { //Intersection Cells
+	// 			/*
+	// 			######################################################
+
+	// 			PERSIMPANGAN JALAN
+
+	// 			######################################################
+	// 			*/
+	// 			var interCell = createInterCell(node);
+				
+	// 			//Akses way yang masuk
+	// 			for (var j = 0; j < node.inWays.length; j++) {
+	// 				var way = node.inWays[j];
+	// 				var defaultLastSegment = way.segments[way.segments.length-1];
+	// 				var defaultLastCell = defaultLastSegment.defaultCells[defaultLastSegment.defaultCells.length-1]; //Last cell
+	// 				defaultLastCell.nextCell = interCell; //last cell bisa akses S dari intersection Cell
+	// 				interCell.inCells.push(defaultLastCell);
+	// 				if (!way.tags["oneway"]) { //ada dua arah
+	// 					var alternateFirstCell = defaultLastSegment.alternateCells[0] //segmen pertama jadi yang terakhir k
+	// 					alternateFirstCell.prevCell = interCell;
+	// 					if (alternateFirstCell.Q > interCell.maxQ) {
+	// 						interCell.maxQ = alternateFirstCell.Q;
+	// 					}
+	// 					interCell.outCells.push(alternateFirstCell);
+
+	// 				}
+	// 			}//Jalan masuk ke intercell sudah terhubung dengan intercell
+	// 			//Akses way yang keluar
+	// 			for (var j = 0; j < node.outWays.length; j++) {
+	// 				var way = node.outWays[j]; //Jalan keluar dari interCell
+	// 				var defaultFirstSegment = way.segments[0]; //segmen pertama yang terhubung dengan interCell
+	// 				var defaultFirstCell = defaultFirstSegment.defaultCells[0]; //First cell
+	// 				if (defaultFirstCell.Q > interCell.maxQ) {
+	// 					interCell.maxQ = defaultFirstCell.Q;
+	// 				}
+	// 				defaultFirstCell.prevCell = interCell;
+	// 				interCell.outCells.push(defaultFirstCell);
+	// 				if (!way.tags["oneway"]) { //ada dua arah
+	// 					var alternateLastCell = defaultFirstSegment.alternateCells[defaultFirstSegment.alternateCells.length-1] //segmen pertama jadi yang terakhir k
+	// 					interCell.inCells.push(alternateLastCell);
+	// 					alternateLastCell.nextCell = interCell;
+	// 				}
+	// 			}//Jalan keluar dari intercell sudah terhubung
+				
+	// 			//Push ke repo pusat nanti update lebih mudah
+	// 			interCells.push(interCell);
+
+	// 		}
+
+	// 	}
+	// }
+	// // alert("InterCells Create length: "+interCells.length);
+
+	// /*
+	// ########################################
+	// UPDATE MAXFLOW TIAP CELLS
+	// ########################################
+	// */
+	// for (var i = 0; i < cells.length; i++) {
+	// 	cells[i].setMaxFlow();
+	// }
+}
 function getGeneratingNodes() { 
 	//ambil data xml map
 	//Ambil data boundary, di tag <bounds>
@@ -664,7 +903,244 @@ function createInterCell(node) {
 			}
 
 		}
+		distribute: function() {
+			var sumSend = 0;
+			var sumReceive = 0;
+
+			//Cari jumlah kendaraan yang bisa ditampung
+			for (var i = 0; i < this.outCells.length; i++) {
+				sumSend+= this.outCells[i].N-this.outCells[i].n; //berdasarkan sisa tempat kosong untuk safe setiap kendaraan masuk bisa ditampung, pessimistic approach
+				this.outCells[i].isFinal = true;
+			}
+
+			//Cari jumlah kendaraan yang diterima persimpangan
+			for (var i = 0; i < this.inCells.length; i++) {
+				sumReceive+= this.inCells[i].S;
+			}
+
+			//sumSend dibatasi terhadap maxQ
+			var effOut = Math.min(sumSend,sumReceive); //Cari mana yang lebih kecil, jumlah send efektif
+			var effIn = effOut;
+			
+			globalAlert += "toDist: "+effIn+"\n";
+			if (! effIn == sumReceive) { //jumlah tidak sesuai sumSend, S masing-masing inCells harus diupdate sesuai sumReceive
+				for (var i = 0; i < this.inCells.length; i++) {
+					//Pre-empty semua S inCells agar distribusi bisa pakai satu pengulangan saja dengan proses lebih sedikit
+					//awalnya disini didistribusi dulu sesuai jumlah total effIn tapi tidak efisien kode
+					this.inCells[i].S = 0;
+					
+				}
+
+				var inVal = effIn/this.sumInPriority;
+				var k = 0;
+				globalAlert+="Enter effIn while,";
+				// alert(globalAlert);
+				while (effIn > 0) {
+					alert("Stuck effIn: "+effIn+" on "+globalI+" interCells");
+					var maxInSend = this.inCells[k].n-this.inCells[k].S;
+					var remainDist = Math.floor(this.inCells[k].segment.priority*inVal);
+					if (remainDist < 1) {
+						remainDist = 1;
+					}
+
+					//pastikan jangan sampai S > n nanti hasinya negatif jadi tidak benar secara realistis,
+					//negatif artinya kendaraan dari satu sel sebelum inCell bisa lolos juga, padahal 1 clock tick hanya bisa 1 cell
+					if ((maxInSend) >= remainDist) {
+						effIn -= remainDist;
+						this.inCells[k].S += remainDist;
+					} else if (maxInSend > 0) { // remainDist > maxInSend > 0 
+						effIn -= maxInSend;
+						this.inCells[k].S += maxInSend;
+					}
+					k++;
+					if (k == this.inCells.length) {
+						k = 0;
+					}
+				}
+				globalAlert+="Exit effIn while\n";
+			} //else, effIn == sumReceive, sesuai dengan nilai S yang sudah di set
+
+
+			//DISTRIBUSI OUTCELL
+			if (effOut == sumSend) {//sesuai dengan tempat kosong masing-masing outCell
+				for (var i = 0; i<this.outCells.length; i++) {
+					this.outCells[i].R = this.outCells[i].N - this.outCells[i].n; //diisi sesuai tempat kosongnya 
+				}
+			} else {//effOut pasti < sumSend (karena function Math.min(sumSend, sumReceive)), hitung ulang distribusinya
+				//nilai R tiap outCell == 0 karena belum di set
+				var k = 0;
+				outVal = effOut/this.sumOutPriority;
+				globalAlert += "Enter effOut while,";
+				// alert(globalAlert);
+				while (effOut > 0) {
+					// alert("Stuck effOut: "+effOut+" on "+globalI+" interCells Node Id: "+this.node.id);
+					var outMaxReceive = this.outCells[k].N - this.outCells[k].n;
+					var remainDist = Math.floor(this.outCells[k].segment.priority*outVal);
+					if (remainDist < 1) {
+						remainDist = 1;
+					}
+
+					if (outMaxReceive > 0) { //cek masih ada tempat atau tidak
+						if (outMaxReceive >= remainDist) { //Sisa tempat cukup untuk remainDist
+							effOut -= remainDist;
+							this.outCells[k].R += remainDist;
+						} else { //Sisa tempat tidak cukup untuk remainDist
+							effOut -= outMaxReceive;
+							this.outCells[k].R += outMaxReceive;
+						}
+					}
+
+					k++;
+					if (k == this.outCells.length) {
+						k = 0;
+					}
+				}//effOut harusnya bernilai 0
+				globalAlert +="Exit effOut while\n";
+			}
+
+			for (var i = 0; i < this.outCells.length; i++) {
+				this.outCells[i].receive2(false);
+			}
+
+			//Cari jumlah kendaraan yang diterima persimpangan
+			for (var i = 0; i < this.inCells.length; i++) {
+				this.inCells[i].receive2(true);
+			}
+			//interCell pertama akan menyalurkan kendaraan2 ke interCell lain, cari interCell yang akan diakses selanjutnya
+		},
+		distribute2: function() { //Conceptnya traversal tree depth first, hanya dilakukan oleh intersect yang final
+			var sumSend = 0;
+			var sumReceive = 0;
+
+			//Cari jumlah kendaraan yang bisa ditampung
+			for (var i = 0; i < this.outCells.length; i++) {
+				sumSend+= this.outCells[i].receiveCap;
+				this.outCells[i].isFinal = true;
+			}
+
+			//Cari jumlah kendaraan yang diterima persimpangan
+			for (var i = 0; i < this.inCells.length; i++) {
+				sumReceive+= this.inCells[i].S;
+			}
+
+			//DISTRIBUSI ke inCells
+			var effIn = Math.min(sumSend,sumReceive); //Cari mana yang lebih kecil, jumlah send efektif
+			var effOut = effIn;
+			var inVal = effIn/this.sumInPriority;
+			// alert("Initial effIn:"+effIn);
+			for (var i = 0; i < this.inCells.length; i++) {
+				var eachSend = Math.floor(this.inCells[i].segment.priority*inVal);
+				// var eachSend = ((this.inCells[i].segment.priority/this.sumInPriority)*this.maxQ); //kuota berdasarkan flow maksimum
+				if (this.inCells[i].S >= eachSend) { //n nya lebih besar dari distribusi masing-masing sel
+					effIn -= eachSend;
+					this.inCells[i].S = eachSend;
+				} else { //n lebih kecil jadi ditransfer semuass
+					effIn -= this.inCells[i].n;
+					this.inCells[i].S = this.inCells[i].n;
+				}
+				this.inCells[i].isFinal = true; //pokoknya semua yang sudah terkena salah satu cell final jadi final
+			}
+
+			inVal = effIn/this.sumInPriority;
+			var k = 0;
+			// inVal = effIn/this.sumInPriority;
+			while (effIn > 0) {
+				var remainDist = Math.floor(this.inCells[k].segment.priority*inVal);
+				if (remainDist < 1) {
+					remainDist = 1;
+				}
+				if ((this.inCells[k].n-this.inCells[k].S) > 0) {
+					if ((this.inCells[k].n-this.inCells[k].S) >= remainDist) {
+						effIn -= remainDist;
+						this.inCells[k].S += remainDist;
+					} else { //in case kendaraan sudah habis, this.inCells[k].n-this.inCells[k].S = 0; safe untuk operation, tapi redundan
+						effIn -= this.inCells[k].n-this.inCells[k].S;
+						this.inCells[k].S += this.inCells[k].n-this.inCells[k].S;
+					}
+				}
+				k++;
+				if (k == this.inCells.length) {
+					k = 0;
+				}
+			} //effIn harusnya bernilai 0
+
+			//DISTRIBUSI ke outCells
+			var outVal = effOut/this.sumOutPriority;
+			for (var i = 0; i < this.outCells.length; i++) {
+				var eachSend = Math.floor(this.outCells[i].segment.priority*outVal);
+				if (this.outCells[i].receiveCap >= eachSend) { //n nya lebih besar dari distribusi masing-masing sel
+					effOut -= eachSend;
+					this.outCells[i].R = eachSend;
+				} else { //n lebih kecil jadi ditransfer semuass
+					effOut -= this.outCells[i].receiveCap;
+					this.outCells[i].R = this.outCells[i].receiveCap;
+				}
+				this.outCells[i].isFinal = true;
+			}
+			k = 0;
+			outVal = effOut/this.sumOutPriority;
+			while (effOut > 0) {
+				var remainDist = Math.floor(this.outCells[k].segment.priority*outVal);
+				if (remainDist < 1) {
+					remainDist = 1;
+				}
+
+				if ((this.outCells[k].receiveCap-this.outCells[k].R) > 0) { //cek masih ada tempat atau tidak
+					if ((this.outCells[k].receiveCap-this.outCells[k].R) >= remainDist) { //Sisa tempat cukup untuk remainDist
+						effOut -= remainDist;
+						this.outCells[k].R += remainDist;
+					} else { //Sisa tempat tidak cukup untuk remainDist
+						effOut -= this.outCells[k].receiveCap-this.outCells[k].R;
+						this.outCells[k].R += this.outCells[k].n-this.outCells[k].R;
+					}
+				}
+				k++;
+				if (k == this.outCells.length) {
+					k = 0;
+				}
+			}//effOut harusnya bernilai 0
+
+			//UPDATE CELL-CELL yang terhubung ke inCells
+			for (var i = 0; i < this.inCells.length; i++) {
+				if (this.inCells[i].n-this.inCells[i].S == 0) { //nilainya sama, untuk save processing, receive tanpa update nilai
+					this.inCells[i].receive(false);
+				} else {
+					this.inCells[i].receive(true);
+				}
+			}
+			this.isFinal = true;
+		
+		},
 
 	}
 	return cell;
+}
+
+function createCell() {
+	receive2 : function(prev) {
+			var curr = this;
+			var nearby = {};
+			if (!prev) {
+				nearby = curr.nextCell;
+				while (!(nearby== null || nearby.isIntersect)) {
+					// alert("while prev false");
+					nearby.receiveCap = nearby.N-(nearby.n-nearby.S);
+					nearby.R = Math.min(nearby.receiveCap, nearby.Q, curr.n); //Send diperbarui sesuai dengan receiveCap curr yang sudah fix
+					curr.S = nearby.R; //nearby.S sudah fix
+					curr = nearby;
+					nearby = curr.nextCell;
+				}
+
+			} else {
+				nearby = curr.prevCell;
+				while (!(nearby== null || nearby.isIntersect)) {
+					curr.receiveCap = curr.N-(curr.n-curr.S);
+					nearby.S = Math.min(curr.receiveCap, curr.Q, nearby.n); //Send diperbarui sesuai dengan receiveCap curr yang sudah fix
+					curr.R = nearby.S; //nearby.S sudah fix
+					curr = nearby;
+					nearby = curr.prevCell;
+				}
+			}
+			
+		},
 }

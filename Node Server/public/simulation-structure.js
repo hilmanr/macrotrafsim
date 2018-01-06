@@ -3,31 +3,9 @@
 //Menggunakan dasar dari leaflet-osm.js, link https://github.com/jfirebaugh/leaflet-osm
 var nodes = {};
 var ways = {};
-
-
-L.Map = L.Map.extend({
-	openPopup: function (popup, latlng, options) { 
-		if (!(popup instanceof L.Popup)) {
-			var content = popup;
-
-			popup = new L.Popup(options).setContent(content);
-		}
-
-		if (latlng) {
-			popup.setLatLng(latlng);
-		}
-
-		if (this.hasLayer(popup)) {
-			return this;
-		}
-
-	// NOTE THIS LINE : COMMENTING OUT THE CLOSEPOPUP CALL
-	//this.closePopup(); 
-	this._popup = popup;
-	return this.addLayer(popup);        
-	}
-});
-
+var bound = {};
+var layerArr = [];
+var initialLayerGroup = {};
 L.OSM = {};
 
 L.OSM.TileLayer = L.TileLayer.extend({
@@ -93,6 +71,7 @@ L.OSM.DataLayer = L.FeatureGroup.extend({
 				layer = L.polyline(latLngs, {color:"grey"});
 			}
 
+			//Dari library masternya, digunakan untuk getBoundsLayer Saja
 			layer.addTo(this);
 			layer.feature = feature;
 		}
@@ -125,13 +104,15 @@ L.Util.extend(L.OSM, {
 		var nodes = xml.getElementsByTagName("bounds");
 		for (var i = 0; i < nodes.length; i++) {
 			var node = nodes[i];
-			result.push({
-				id: "bounds",
+			//variabel global
+			bound = {
+				id: "bound",
 				type: "changeset",
 				latLngBounds: L.latLngBounds(
 					[node.getAttribute("minlat"), node.getAttribute("minlon")],
 					[node.getAttribute("maxlat"), node.getAttribute("maxlon")]),
-			});
+			};
+			result.push(bound);
 		}
 
 		return result;
@@ -160,6 +141,8 @@ L.Util.extend(L.OSM, {
 				outCells : [], //untuk akomodasi custom source Cell
 				// wayCount : 0, //jumlah way yang memiliki node ini, sink/source hanya punya 1,
 				//tapi tetap harus dicatat karena waycount = 1 bisa sink atau source
+				inCellsCount : 0, //dicatat sendiri karena statik sementara objek cells (meskipun jumlahnya sama) bisa berubah (menjadi objek yang lain)
+				outCellsCount : 0,
 				marker : null //untuk membuat marker supaya bisa diakses balik
 
 			};
@@ -194,13 +177,13 @@ L.Util.extend(L.OSM, {
 			if (way_object.tags["highway"]=="primary") { 
 				way_object.wayClass = 5;
 			} else if (way_object.tags["highway"]=="primary_link") {
-				way_object.wayClass = 3;
+				way_object.wayClass = 4;
 			} else if (way_object.tags["highway"]=="secondary") {
 				way_object.wayClass = 3;
 			} else if (way_object.tags["highway"]=="secondary_link") {
-				way_object.wayClass = 2;
+				way_object.wayClass = 3;
 			} else {
-				way_object.wayClass = 1;
+				way_object.wayClass = 2;
 			}
 
 			var k; //untuk iterasi balik
