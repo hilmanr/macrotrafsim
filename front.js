@@ -17,8 +17,8 @@ function setMap(boundary) {
 
 	//initial load
 	$.ajax({
-	  // url : "http://localhost:3000/mapPreprocess/"+boundary,
-	  url : "http://localhost:3000/getProcessedMap/map_preprocessed.xml",
+	  url : "http://localhost:3000/mapPreprocess/"+boundary,
+	  // url : "http://localhost:3000/getProcessedMap/map_preprocessed.xml",
 	  // url : "http://localhost:3000/preprocessSavedMapData",
 	  // type : "post",
 	  dataType: "xml",
