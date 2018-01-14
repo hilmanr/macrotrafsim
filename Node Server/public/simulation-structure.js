@@ -133,17 +133,20 @@ L.Util.extend(L.OSM, {
 				tags: this.getTags(node),
 				//Disini tambahan untuk langsung masuk ke simulasi lebih mudah
 				isIntersect : false, //true = persimpangan, false = jalan lurus
+				isIntermediate : false,
 				isSource : false, //source node lokal sebuah way, bukan dalam jaringan
 				isSink : false, //sink node lokal sebuah way, bukan dalam jaringan
 				inWays : [], //daftar jalan masuk, HANYA DIMILIKI DI UJUNG-UJUNG JALAN
 				outWays : [], //daftar jalan keluar, HANYA DIMILIKI DI UJUNG-UJUNG JALAN
+				intersectCell : null,
 				inCells : [], //untuk akomodasi custom source Cell
 				outCells : [], //untuk akomodasi custom source Cell
 				// wayCount : 0, //jumlah way yang memiliki node ini, sink/source hanya punya 1,
 				//tapi tetap harus dicatat karena waycount = 1 bisa sink atau source
 				inCellsCount : 0, //dicatat sendiri karena statik sementara objek cells (meskipun jumlahnya sama) bisa berubah (menjadi objek yang lain)
 				outCellsCount : 0,
-				marker : null //untuk membuat marker supaya bisa diakses balik
+				marker : null, //untuk membuat marker supaya bisa diakses balik
+				circleMarker : null
 
 			};
 			count++;
@@ -165,6 +168,7 @@ L.Util.extend(L.OSM, {
 
 			var way_object = {
 				id: way.getAttribute("id"),
+				editStat : 0, //0 = default kondisi awal, 1 = edited to oneway, default sebagai oneway, 2 = edited to oneway, alternate sebagai oneway, 3 = edited to two way
 				type: "way",
 				nodes: new Array(nds.length),
 				tags: this.getTags(way),
@@ -191,7 +195,7 @@ L.Util.extend(L.OSM, {
 			if (way_object.tags["oneway"] == -1) {
 				way_object.tags["oneway"] = true;
 				k = nds.length-1;
-			reverse = true; //false
+				reverse = true; //false
 			} else {
 				k = 0;
 				reverse = false;

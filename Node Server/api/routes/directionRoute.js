@@ -19,11 +19,16 @@ module.exports = function(app) {
 
 	app.route('/mapPreprocess/:boundary')
 	.get(directionController.mapPreprocess);
+	
+	app.route('/preprocessSavedMapData')
+	.get(directionController.preprocessSavedMapData);
 
-	app.route('/getProcessedMap')
+	app.route('/getProcessedMap/:fileName')
 	.get(directionController.getProcessedMap);
 
 	app.route('/addNewElement')
 	.post(directionController.addNewElement);
+
+
 
 };

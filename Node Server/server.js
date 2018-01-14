@@ -1,8 +1,8 @@
 var express = require('express'),
 	app = express(),
-	port = process.env.PORT || 3000;
+	port = process.env.PORT || 3000,
 	// mongoose = require('mongoose'),
-	// bodyParser = require('body-parser'),
+	bodyParser = require('body-parser');
     // serveStatic = require('serve-static');
 
 app.use(function (req, res, next) {
@@ -25,6 +25,7 @@ app.use(function (req, res, next) {
 });
 
 app.use(express.static('public'));
+// app.use(bodyParser);
 
 var routes = require('./api/routes/directionRoute');
 routes(app);

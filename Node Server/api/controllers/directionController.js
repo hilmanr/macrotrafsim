@@ -283,13 +283,118 @@ exports.mapPreprocess = function(req,res) {
 	});
 }
 
+exports.preprocessSavedMapData = function(req,res) {
+	// var fileName = req.params.fileName;
+	var fileName = "map_bandung.xml";
+	console.log("Preprocess Saved Map Data");
+	
+	fs.readFile("./data/"+fileName, function(err,data) {
+		if (!err) {
+			console.log("File name: "+fileName);
+			var mapData = data.toString();
+
+			var mapXML = new DOMParser().parseFromString(mapData); //root
+			if (mapXML != null) {
+				var ways =  mapXML.documentElement.getElementsByTagName("way");
+				var nodes = mapXML.documentElement.getElementsByTagName("node");
+				
+				//Filter way/jalan yang sesuai
+				console.log("Processing Way");
+				for (var i=0; i<ways.length;i++) {
+					var tags = ways[i].getElementsByTagName("tag");
+					var valid = false;
+					for (var j=0; j<tags.length; j++) {
+						if (tags[j].getAttribute("k")=="highway") {
+							if (tags[j].getAttribute("v")=="primary" ||
+					            tags[j].getAttribute("v")=="secondary" ||
+					            tags[j].getAttribute("v")=="tertiary" ||
+					            tags[j].getAttribute("v")=="primary_link" ||
+					            tags[j].getAttribute("v")=="secondary_link" ||
+					            tags[j].getAttribute("v")=="tertiary_link") {
+								valid = true;
+								break;
+							}
+						}
+					}
+					if (!valid) {
+						var textNode = ways[i].previousSibling;
+						if (textNode.nodeType != 1) {
+							mapXML.removeChild(textNode);
+						}
+						mapXML.removeChild(ways[i]);
+					}
+				}//way sudah difilter hanya jalan raya saja (primary, secondary, dan tertiary)
+				
+				//sekarang filter nodenya
+				process.stdout.write("Filter relevant node");
+				console.log("\nNode Count: "+nodes.length);
+				for (var i=0; i<nodes.length; i++) {
+					var node = nodes[i];
+					var ways = mapXML.documentElement.getElementsByTagName("way");
+					var validNode = false;
+					process.stdout.clearLine();  // clear current text
+					process.stdout.cursorTo(0);  // move cursor to beginning of line
+					process.stdout.write("Node:"+(i+1));
+					for (var j=0; j<ways.length; j++) {
+						var way = ways[j];
+						var nds = way.getElementsByTagName("nd");
+						for (var k=0; k<nds.length; k++) {
+							if (node.getAttribute("id")==nds[k].getAttribute("ref")) {
+								validNode = true;
+								break;
+							}
+						}
+						if (validNode) {
+							break;
+						}
+					}
+					if (!validNode) {
+						var textNode = node.previousSibling;
+						if (textNode.nodeType != 1) {
+							mapXML.removeChild(textNode);
+						}
+						mapXML.removeChild(node);
+					}
+				}
+
+				//Hapus tag <relation> sementara tidak diperlukan
+				console.log("\nRemove relation");
+				var relations = mapXML.documentElement.getElementsByTagName("relation");
+				for (var i = 0; i<relations.length; i++) {
+					mapXML.removeChild(relations[i].previousSibling);
+					mapXML.removeChild(relations[i]);
+				}
+
+
+				fs.writeFile("./data/savedmap_preprocessed.osm", mapXML.toString(), function(err) {
+					if (!err) {
+						console.log("Preprocessed Map Berhasil");
+					} else {
+						err.message;
+					}
+				});
+				res.body = mapXML.toString();
+				res.send(res.body);
+				
+			} else {
+				console.log("No Map Data")
+			}
+		} else {
+			console.log(err.message);
+		}
+	});
+}
 
 exports.getProcessedMap = function(req,res) {
-	fs.readFile("./data/map_preprocessed.osm", function(err,data) {
+	var fileName = req.params.fileName;
+	// var fileName = "map_bandung_preprocessed.xml";
+	fs.readFile("./data/"+fileName, function(err,data) {
 		if (!err) {
 			var mapData = data.toString();
 			res.send(mapData);
 			console.log("getProcessedMap Berhasil");
+		} else {
+			console.log(err.message);
 		}
 	});
 }
