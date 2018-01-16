@@ -17,8 +17,8 @@ function setMap(boundary) {
 
 	//initial load
 	$.ajax({
-	  url : "http://localhost:3000/mapPreprocess/"+boundary,
-	  // url : "http://localhost:3000/getProcessedMap/map_preprocessed.xml",
+	  // url : "http://localhost:3000/mapPreprocess/"+boundary,
+	  url : "http://localhost:3000/getProcessedMap/map_preprocessed.osm",
 	  // url : "http://localhost:3000/preprocessSavedMapData",
 	  // type : "post",
 	  dataType: "xml",
@@ -298,12 +298,11 @@ mymap.on("click", function(e) {
 			if (editNodes.length == 2) {
 				// alert("editNodes[0]"+editNodes[0].isSource+","+editNodes[0].isSink+","+editNodes[0].isIntersect+"\n"+
 				// 	"editNodes[1]"+editNodes[1].isSource+","+editNodes[1].isSink+","+editNodes[1].isIntersect+"\n")
-
 				if ((editNodes[0].isSource || editNodes[0].isSink || editNodes[0].isIntersect) &&
 				 (editNodes[1].isSource || editNodes[1].isSink || editNodes[1].isIntersect)) {
-
+					editNodes[1].circleMarker.setStyle({fillColor:"green"});
 					connected = connectedNodes(editNodes[0],editNodes[1]);
-					// alert(connected.found+","+connected.routes[0].way.id+","+connected.routes[0].mode+","+connected.mode);
+					// alert(connected.found+/*connected.routes[0].segment+","+connected.routes.length+*/","+connected.mode);
 					if (connected.found) {
 						alert("Pilih menu edit yang tersedia");
 						if (connected.mode == 1) { //edit to one way

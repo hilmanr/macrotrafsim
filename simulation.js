@@ -46,6 +46,7 @@ function createSegment(way,startNode,endNode) {
 		priority : way.wayClass, //diupdate sesuai kondisi lalu lintas. Nilai maks 4 karena ada 4 jenis klasifikasi kondisi lalu lintas
 		defaultCells : [], //menampung cells yang ada
 		alternateCells : [], //menampung cells untuk arah sebalik urutan nodes
+		editStat : 0,
 		n : 0, //segment occupancy
 		altn : 0,
 		N : 0, //segment total capacity dari total seluruh cell, kapasitas cell * jumlah cell
@@ -310,13 +311,13 @@ function createInterCell(node) {
 				var eachOutSumPriority = 0;
 
 				for (var j = 0; j < this.outCells.length; j++) {
-					if ( this.inCells[i].segment.way.id != this.outCells[j].segment.way.id) {
+					if (!(this.inCells[i].segment === this.outCells[j].segment)) {
 						eachOutSumPriority += this.outCells[j].segment.priority;
 					}//sumPriority spesifik tiap outCells
 				} //Dapat sum priority incells yang bisa kirim ke outcells
 				var initialSend = this.inCells[i].n-this.inCells[i].S;
 				for (var j = 0; j < this.outCells.length; j++) { //Initial distribute
-					if ( this.inCells[i].segment.way.id != this.outCells[j].segment.way.id) {
+					if (!(this.inCells[i].segment === this.outCells[j].segment)) {
 						var currentOutCellReceive = 0;
 
 						if (initialSend > 1) {
@@ -353,7 +354,7 @@ function createInterCell(node) {
 					if (remainDist < 1) {
 						remainDist = 1;
 					}
-					if (this.inCells[i].segment.way.id != this.outCells[k].segment.way.id) {
+					if (!(this.inCells[i].segment === this.outCells[k].segment)) {
 						if (this.outCells[k].N-this.outCells[k].n-this.outCells[k].R+this.outCells[k].S > remainDist) {
 							cont = cont || true;
 							this.outCells[k].R += remainDist;
@@ -388,8 +389,8 @@ function createInterCell(node) {
 			for (var i = 0; i<this.inCells.length; i++) {
 				var portion = 0;
 				var outCellsProbsLength = 0;
-				if ((this.inCells[i].segment.way.tags["oneway"] && this.inCells[i].segment.way.editStat == 0) ||
-					this.inCells[i].segment.way.editStat == 1 || this.inCells[i].segment.way.editStat == 2) {
+				if ((this.inCells[i].segment.way.tags["oneway"] && this.inCells[i].segment.editStat == 0) ||
+					this.inCells[i].segment.editStat == 1 || this.inCells[i].segment.editStat == 2) {
 					portion = 100/this.outCells.length;
 					outCellsProbsLength = this.outCells.length;
 				} else {
@@ -418,7 +419,7 @@ function createInterCell(node) {
 				var remain = this.inCells[i].n - this.inCells[i].S;
 				var k = 0;
 				for (var j = 0; j < this.outCells.length; j++) { //index outCells sama dengan index outCellsProbs
-					if (!(this.outCells[j].segment.way === this.inCells[i].segment.way)) {
+					if (!(this.outCells[j].segment === this.inCells[i].segment)) {
 						var eachOutReceive = Math.floor(outCellsProbs[k]*(remain));
 						if (this.outCells[j].N-this.outCells[j].n-this.outCells[j].R+this.outCells[j].S >= eachOutReceive) {
 							this.outCells[j].R += eachOutReceive;
@@ -438,7 +439,7 @@ function createInterCell(node) {
 				var j = 0;
 				k = 0;
 				while (remain > 0 && !finish) {
-					if (!(this.outCells[j].segment.way === this.inCells[i].segment.way)) {
+					if (!(this.outCells[j].segment === this.inCells[i].segment)) {
 						var eachOutRemainReceive = Math.floor(outCellsProbs[k]*remain);
 						if (eachOutRemainReceive < 1) {
 							eachOutRemainReceive = 1;
@@ -632,6 +633,10 @@ function createWaySegments(clockTick, avgVLength) { //Istansiasi
 		intermediateNodes[i].isIntermediate = true;
 		interNodes.push(intermediateNodes[i]);
 	}
+	document.getElementById("wayCount").innerHTML = ways.length;
+	document.getElementById("segmentCount").innerHTML = segments.length;
+	document.getElementById("cellCount").innerHTML = cells.length;
+	document.getElementById("intersectCount").innerHTML = interCells.length;
 }
 
 
@@ -663,7 +668,7 @@ function sourceGenerate(generateValue) {
 			if (sourceNodes[i].outCells[j].currentQ < effGen) {
 				effGen = sourceNodes[i].outCells[j].currentQ;
 			}
-			str += "outCells["+i+"] Gen: "+effGen+"<br>";
+			str += "outCells["+j+"] Gen: "+effGen+"<br>";
 		}
 		sourceNodes[i].marker.setPopupContent("Generate: "+generateValue+"<br>"+str, {closeOnClick: false, autoClose: false, autoPan: false});
 	}
@@ -721,6 +726,12 @@ function setCustomSourceNode(latLng) {
 	nodes[nodeId].marker = L.marker(nodes[nodeId].latLng).addTo(mymap);
 	// nodes[nodeId].marker.bindPopup("",{closeOnClick: false, autoClose: false, autoPan: false}).openPopup();
 	sourceNodes.push(nodes[nodeId]);
+	for(var i = 0; i< nodes[nodeId].outCells.length; i++) {
+		nodes[nodeId].outCells[i].isSource = true;
+		if (sourceCells.findIndex(eachCell => eachCell === nodes[nodeId].outCells[i]) == -1) {
+			sourceCells.push(nodes[nodeId].outCells[i]);	
+		}
+	}
 	alert("Custom Source Node sudah ditambahkan");
 }
 
@@ -730,7 +741,9 @@ function setSourceCells() {
 		sourceNodes[j].marker.bindPopup("",{closeOnClick: false, autoClose: false, autoPan: false}).openPopup();
 		for(var i = 0; i<sourceNodes[j].outCells.length; i++) {
 			sourceNodes[j].outCells[i].isSource = true;
-			sourceCells.push(sourceNodes[j].outCells[i]);
+			if (sourceCells.findIndex(eachCell => eachCell === sourceNodes[j].outCells[i]) == -1) {
+				sourceCells.push(sourceNodes[j].outCells[i]);	
+			}
 		}
 	}
 }
@@ -777,7 +790,15 @@ function getDefaultSourceNodes() {
 			var j = 0;
 			var validOuterNode = false;
 			if (outerNode.outCells.length > 0) {
-				validOuterNode = true;
+				var validCells = true;
+				for (var k = 0; k < outerNode.outCells.length && validCells; k++) {
+					if (outerNode.outCells[k].prevCell == null) {
+						validCells = validCells && true;
+					} else {
+						validCells = validCells && false;
+					}
+				}
+				validOuterNode = validCells;
 			}
 			//cari di validNodes
 			if (validOuterNode) {
@@ -898,6 +919,7 @@ function getIntermediateNodes() { //intermediate dan intersection
 		if ((node.inCells.length + node.outCells.length) == 2) { //Cari intermediate node
 			if (node.inCells.length == 1 && node.outCells.length == 1) { //Jalan satu arah
 				if (node.inWays.length+node.outWays.length != 1) { //di ujung
+					node.isIntermediate = true;
 					intermediateNodes.push(node);
 					markers.push(L.marker(node.latLng));	
 				}
@@ -906,6 +928,7 @@ function getIntermediateNodes() { //intermediate dan intersection
 
 			if (node.inCells.length == 2 && node.outCells.length == 2) { //Jalan dua arah
 				if (node.inWays.length + node.outWays.length == 0 || node.inWays.length + node.outWays.length == 2) { //di tengah-tengah jalan
+					node.isIntermediate = true;
 					intermediateNodes.push(node);
 					markers.push(L.marker(node.latLng));		
 				}
@@ -984,67 +1007,72 @@ EDIT JARINGAN JALAN
 #########################################################
 */
 
-function connectedNodes(node1,node2) {
+function connectedNodes(node1,node2) { //node1 dan node2 pasti intersect/source/sink
 	var result = {found: false, routes: [], mode : 0};
 	for (var i = 0; i<node1.inCells.length && !result.found; i++) {
 		var currentCell = node1.inCells[i];
 		var currentNode = node1;
-		var currentWay = node1.inCells[i].segment.way;
+		var currentSegment = node1.inCells[i].segment;
 		var eachCellMode = "";
 		var cont = true;
+		
 		while (cont && !result.found) {
-			currentWay = currentCell.segment.way;
+			currentSegment = currentCell.segment;
 			if (currentCell.type == "def") {
 				eachCellMode = "def";
-				currentNode = currentCell.segment.way.nodes[0];
+				currentNode = currentCell.segment.nodes[0];
+
+				
 			} else {
 			 	eachCellMode = "alt";
-			 	currentNode = currentCell.segment.way.nodes[currentCell.segment.way.nodes.length-1];
+		 		currentNode = currentCell.segment.nodes[1];	 	
 			}
 			if (currentNode.id == node2.id) { //found
 				result.found = true;
-				var route = {way:currentWay, mode: ""};
-				if (currentWay.editStat == 0) { //kondisi belum di edit
-					if (currentWay.tags["oneway"]) { //kondisi awal satu arah
+				var route = {segment:currentCell.segment, mode: ""};
+				if (currentSegment.editStat == 0) { //kondisi belum di edit
+					if (currentSegment.way.tags["oneway"]) { //kondisi awal satu arah
 						result.mode = 2; //diubah ke 2 arah
 					} else { //kondisi awal 2 arah
 						result.mode = 1; //diubah ke 1 arah dengan arah sesuai mode masing2 way
 					}
-				} else if (currentWay.editStat == 1 || currentWay.editStat == 2) { //kondisi awal satu arah
+				} else if (currentSegment.editStat == 1 || currentSegment.editStat == 2) { //kondisi awal satu arah
 					result.mode = 2; //ubah ke dua arah
-				} else if (currentWay.editStat == 3) {//kondisi jalan 2 arah hasil editing
+				} else if (currentSegment.editStat == 3) {//kondisi jalan 2 arah hasil editing
 					result.mode = 1; //diubah ke 1 arah dengan arah sesuai mode masing-masing way
 				}
-				if (eachCellMode == "def") {
-					route.mode = "alt";
-				} else {
+				if (eachCellMode == "alt") {
 					route.mode = "def";
+				} else {
+					route.mode = "alt";
 				}
+				
 				// alert("route.mode found in: "+route.mode);
 				result.routes.push(route);
 			} else { //tidak ketemu
 				if (currentNode.isIntersect || currentNode.isSource || currentNode.isSink) { //hentikan pencarian, tidak ketemu di titik itu
 					cont = false;
 					result.routes = [];
+					// alert("exit in, stat: inter,source,sink:"+currentNode.isIntersect+","+currentNode.isSource+","+currentNode.isSink);
 				} else if (currentNode.isIntermediate) { //lanjut pencarian
-					var route = {way:currentWay, mode: ""};
-					if (eachCellMode == "def") { //cell yang dipilih sekarang adalah defaultCells
-						for (var j = 0; j < currentNode.inCells.length; j ++) {
-							if (currentNode.inCells[j].segment.way.id != currentWay.id) {
-								//ini yang dipilih
-								currentCell = currentNode.inCells[j];
-							}
+					// alert("enter in intermediate");
+					for (var j = 0; j < currentNode.inCells.length; j ++) {
+						if (currentNode.inCells[j].segment !== currentSegment) {
+							//ini yang dipilih
+							currentCell = currentNode.inCells[j];
 						}
-						route.mode =  "alt";
-						
-					} else if (eachCellMode == "alt") {
-						for (var j = 0; j < currentNode.outCells.length; j ++) {
-							if (currentNode.outCells[j].segment.way.id != currentWay.id) {
-								//outi yang dipilih
-								currentCell = currentNode.outCells[j];
-							}
-						}
+					}
+					var route = {segment:currentSegment, mode: ""};
+					if (eachCellMode == "alt") { //cell yang dipilih sekarang adalah defaultCells
 						route.mode =  "def";
+					} else if (eachCellMode == "def") {
+						// for (var j = 0; j < currentNode.outCells.length; j ++) {
+						// 	if (currentNode.outCells[j].segment !== currentSegment) {
+						// 		//outi yang dipilih
+						// 		currentCell = currentNode.outCells[j];
+						// 	}
+						// }
+						route.mode =  "alt";
 					}
 					result.routes.push(route);
 				}
@@ -1053,36 +1081,36 @@ function connectedNodes(node1,node2) {
 	}
 
 	if (!result.found) { //cari di outcells
-		// alert("enter here");
+		// alert("enter out");
 		for (var i = 0; i<node1.outCells.length && !result.found; i++) {
 			var currentCell = node1.outCells[i];
 			var currentNode = node1;
-			var currentWay = node1.outCells[i].segment.way;
+			var currentSegment = node1.outCells[i].segment;
 			var eachCellMode = "";
 			var cont = true;
 			while (cont && !result.found) {
-				currentWay = currentCell.segment.way;
+				currentSegment = currentCell.segment;
 				if (currentCell.type == "def") {
 					eachCellMode = "def";
-					currentNode = currentCell.segment.way.nodes[currentCell.segment.way.nodes.length-1];
+					currentNode = currentCell.segment.nodes[1];
 				} else {
 				 	eachCellMode = "alt";
-				 	currentNode = currentCell.segment.way.nodes[0];
+				 	currentNode = currentCell.segment.nodes[0];
 				}
 				if (currentNode.id == node2.id) { //found
 					// alert("enter found");
 					result.found = true;
-					var route = {way:currentWay, mode: ""};
-					if (currentWay.editStat == 0) { //kondisi belum di edit
-						if (currentWay.tags["oneway"]) { //kondisi awal satu arah
+					var route = {segment:currentCell.segment, mode: ""};
+					if (currentSegment.editStat == 0) { //kondisi belum di edit
+						if (currentSegment.way.tags["oneway"]) { //kondisi awal satu arah
 							// alert("enter here 2");
 							result.mode = 2; //diubah ke 2 arah
 						} else { //kondisi awal 2 arah
 							result.mode = 1; //diubah ke 1 arah dengan arah sesuai mode masing2 way
 						}
-					} else if (currentWay.editStat == 1 || currentWay.editStat == 2) { //kondisi awal satu arah
+					} else if (currentSegment.editStat == 1 || currentSegment.editStat == 2) { //kondisi awal satu arah
 						result.mode = 2; //ubah ke dua arah
-					} else if (currentWay.editStat == 3) {//kondisi jalan 2 arah hasil editing
+					} else if (currentSegment.editStat == 3) {//kondisi jalan 2 arah hasil editing
 						result.mode = 1; //diubah ke 1 arah dengan arah sesuai mode masing-masing way
 					}
 					route.mode = eachCellMode;
@@ -1093,22 +1121,14 @@ function connectedNodes(node1,node2) {
 						cont = false;
 						result.routes = [];
 					} else if (currentNode.isIntermediate) { //lanjut pencarian
-						var route = {way:currentWay, mode: eachCellMode};
-						if (eachCellMode == "def") { //cell yang dipilih sekarang adalah defaultCells
-							for (var j = 0; j < currentNode.inCells.length; j ++) {
-								if (currentNode.inCells[j].segment.way.id != currentWay.id) {
-									//ini yang dipilih
-									currentCell = currentNode.inCells[j];
-								}
-							}
-						} else if (eachCellMode == "alt") {
-							for (var j = 0; j < currentNode.outCells.length; j ++) {
-								if (currentNode.outCells[j].segment.way.id != currentWay.id) {
-									//outi yang dipilih
-									currentCell = currentNode.outCells[j];
-								}
+						// alert("enter out intermediate");
+						for (var j = 0; j < currentNode.outCells.length; j ++) {
+							if (currentNode.outCells[j].segment !== currentSegment) {
+								//ini yang dipilih
+								currentCell = currentNode.outCells[j];
 							}
 						}
+						var route = {segment:currentSegment, mode: eachCellMode};
 						result.routes.push(route);
 					}
 				}
@@ -1118,158 +1138,240 @@ function connectedNodes(node1,node2) {
 	return result;
 }
 
-function editToTwoWay(routes) {
+function editToTwoWay(routes) { //segment based
 	//parameter input refer ke routes yang ada di connectedNodes
-	if (routes[0].way.editStat == 0) {
+	if (routes[0].segment.editStat == 0) {
 		for (var i = 0; i < routes.length; i++) {
 			var mode = routes[i].mode;
-			var way = routes[i].way;
-			way.editStat = 3;
-
-			// alert("segment length: "+way.segments.length);
-			for (var j = 0; j < way.segments.length; j++) {
-				var segment = way.segments[j];	
-				//buat alt cell di masing-masing segment
-				for (var k = 0; k < segment.defaultCells.length; k++) {
-					var cell = createCell(segment, parseInt($("#vLength").val()), parseInt($("#clockTick").val()));
-					cell.type = "alt";
-					segment.alternateCells.push(cell);
-					cells.push(cell); //by reference
-				}
-
-				way.segments[j].nodes[1].outCells.push(way.segments[j].alternateCells[0]);
-				way.segments[j].nodes[0].inCells.push(way.segments[j].alternateCells[way.segments[j].alternateCells.length-1]);
-
-				var k = 0;
-				while (k< segment.alternateCells.length-1) {
-					segment.alternateCells[k].nextCell = segment.alternateCells[k+1];
-					segment.alternateCells[k+1].prevCell = segment.alternateCells[k];
-					k++;
-				} //alternate cell sudah disambung di segmen
-				//Edit marker jalan
-				segment.markerDecorator.removeFrom(mymap);
-				segment.marker.setOffset(-6);
-				segment.marker.setStyle({color: "purple"});
-				rectangleBound.bringToBack();
-				segment.altmarker = L.polyline([segment.nodes[1].latLng,segment.nodes[0].latLng], {weight: way.wayClass*(2), color:"purple", offset: -6}).addTo(mymap);
-				segment.altmarker.bindPopup("",{closeOnClick: false, autoClose: false, autoPan: false});
-				segment.nodes[0].circleMarker.bringToFront();
-				segment.nodes[1].circleMarker.bringToFront();
-				//marker sudah dibuat
-			}
-
-			for (var j = 0; j < way.segments.length-1; j++) {
-				var segment1 = way.segments[j];
-				var segment2 = way.segments[j+1];
-				segment1.alternateCells[0].prevCell = segment2.alternateCells[segment2.alternateCells.length-1]; 
-				segment2.alternateCells[segment2.alternateCells.length-1].nextCell = segment1.alternateCells[0]; 
-			} //sisa di ujung2 jalan yang belum
-
-			if (way.nodes[0].isIntersect) {
-				way.segments[0].alternateCells[way.segments[0].alternateCells.length-1].nextCell = way.segments[0].nodes[0].intersectCell;
-			}
-
-			if (way.nodes[way.nodes.length-1].isIntersect) {
-				way.segments[way.segments.length-1].alternateCells[0].prevCell = way.segments[0].nodes[0].intersectCell;
-			}
-
-			// hubungkan ujung2 jalannya
-			//alternate cells sudah dibuat dan dihubungkan
-			//marker jalan sudah dibuat
-		}
-		//menghubungkan cell antar way
-	}
-	else if (routes[0].way.editStat == 1) { //1 arah def hasil edit
-		//sudah punya alt cell tapi tidak tersambung
-		//hubungkan di ujung2 jalan saja
-		for (var i = 0; i < routes.length-1; i++) {
-			var way1 = routes[i].way;
-			var way2 = routes[i+1].way;
-			if (routes[i].mode == "def") {
-				way1.segments[way1.segments.length-1].alternateCells[0].prevCell = way2.segments[0].alternateCells[way2.segments[0].alternateCells.length-1];
-				way2.segments[0].alternateCells[way2.segments[0].alternateCells.length-1].nextCell = way1.segments[way1.segments.length-1].alternateCells[0];	
-			} else {
-				way2.segments[way2.segments.length-1].alternateCells[0].prevCell = way1.segments[0].alternateCells[way1.segments[0].alternateCells.length-1];
-				way1.segments[0].alternateCells[way1.segments[0].alternateCells.length-1].nextCell = way2.segments[way2.segments.length-1].alternateCells[0];	
-			}
+			var segment = routes[i].segment;
 			
+			//buat alt cell di masing-masing segment
+			for (var k = 0; k < segment.defaultCells.length; k++) {
+				var cell = createCell(segment, parseInt($("#vLength").val()), parseInt($("#clockTick").val()));
+				cell.type = "alt";
+				segment.alternateCells.push(cell);
+				cells.push(cell); //by reference
+			}
+
+			segment.nodes[1].outCells.push(segment.alternateCells[0]);
+			segment.nodes[0].inCells.push(segment.alternateCells[segment.alternateCells.length-1]);
+
+			var k = 0;
+			while (k< segment.alternateCells.length-1) {
+				segment.alternateCells[k].nextCell = segment.alternateCells[k+1];
+				segment.alternateCells[k+1].prevCell = segment.alternateCells[k];
+				k++;
+			} //alternate cell sudah disambung di segmen
+			//Edit marker jalan
+			segment.markerDecorator.removeFrom(mymap);
+			segment.marker.setOffset(-6);
+			segment.marker.setStyle({color: "purple"});
+			rectangleBound.bringToBack();
+			segment.altmarker = L.polyline([segment.nodes[1].latLng,segment.nodes[0].latLng], {weight: segment.way.wayClass*(2), color:"purple", offset: -6}).addTo(mymap);
+			segment.altmarker.bindPopup("",{closeOnClick: false, autoClose: false, autoPan: false});
+			segment.nodes[0].circleMarker.bringToFront();
+			segment.nodes[1].circleMarker.bringToFront();
+			segment.editStat = 3;
+			//marker sudah dibuat
+		// }
 		}
+
+		//sambungkan antar segment
+		for (var j = 0; j < routes.length; j++) {
+			var segment = routes[j].segment;
+			//node[0]
+			for (var k = 0; k < segment.nodes[0].inCells.length; k++) {
+				var cell = segment.nodes[0].inCells[k];
+				var node = segment.nodes[0];
+				if (node.isIntersect) {
+					cell.nextCell = node.intersectCell;
+				} else if (node.isIntermediate) { //pasti 2
+					if (cell.segment !== node.outCells[0].segment) {
+						cell.nextCell = node.outCells[0];
+						node.outCells[0].prevCell = cell;
+					} else if (cell.segment !== node.outCells[1].segment) {
+						cell.nextCell = node.outCells[1];
+						node.outCells[1].prevCell = cell;
+					}
+				}
+			}
+
+			for (var k = 0; k < segment.nodes[0].outCells.length; k++) {
+				var cell = segment.nodes[0].outCells[k];
+				var node = segment.nodes[0];
+				if (node.isIntersect) {
+					cell.prevCell = node.intersectCell;
+				} else if (node.isIntermediate) { //pasti 2
+					if (cell.segment !== node.inCells[0].segment) {
+						cell.prevCell = node.inCells[0];
+						node.inCells[0].nextCell = cell;
+					} else if (cell.segment !== node.inCells[1].segment) {
+						cell.prevCell = node.inCells[1];
+						node.outCells[1].nextCell = cell;
+					}
+				}
+			}
+
+			for (var k = 0; k < segment.nodes[1].inCells.length; k++) {
+				var cell = segment.nodes[1].inCells[k];
+				var node = segment.nodes[1];
+				if (node.isIntersect) {
+					cell.nextCell = node.intersectCell;
+				} else if (node.isIntermediate) { //pasti 2
+					if (cell.segment !== node.outCells[0].segment) {
+						cell.nextCell = node.outCells[0];
+						node.outCells[0].prevCell = cell;
+					} else if (cell.segment !== node.outCells[1].segment) {
+						cell.nextCell = node.outCells[1];
+						node.outCells[1].prevCell = cell;
+					}
+				}
+			}
+
+			for (var k = 0; k < segment.nodes[1].outCells.length; k++) {
+				var cell = segment.nodes[1].outCells[k];
+				var node = segment.nodes[1];
+				if (node.isIntersect) {
+					cell.prevCell = node.intersectCell;
+				} else if (node.isIntermediate) { //pasti 2
+					if (cell.segment !== node.inCells[0].segment) {
+						cell.prevCell = node.inCells[0];
+						node.inCells[0].nextCell = cell;
+					} else if (cell.segment !== node.inCells[1].segment) {
+						cell.prevCell = node.inCells[1];
+						node.outCells[1].nextCell = cell;
+					}
+				}
+			}
+		} //sisa di ujung2 jalan yang belum
+
+		//menghubungkan cell antar way
+	} else { //1 arah def hasil edit
 		//hubungkan ke ujung2 jalan
-		if (routes[0].mode == "def") {
-			routes[0]
-			.way.nodes[0]
-			.inCells
-			.push(
-				routes[0]
-				.way
-				.segments[0]
-				.alternateCells[routes[0].way.segments[0].alternateCells.length-1]
-			);
+		//meskipun alt atau def, untuk editStat == 1, maka yang terputus alternateCells di node[0]
+		var n;
+		if (routes[0].segment.editStat == 1) {//edit stat == 1, mode == default
+			if (routes[0].mode == "def") {
+				routes[0].segment.nodes[0]
+				.inCells
+				.push(
+					routes[0]
+					.segment
+					.alternateCells[routes[0].segment.alternateCells.length-1]
+				);
 
-			routes[routes.length-1] //way terakhir
-			.way.nodes[routes[routes.length-1].way.nodes.length-1] //node terakhir
-			.outCells
-			.push(
-				routes[routes.length-1] //way terakhir
-				.way.segments[routes[routes.length-1].way.segments.length-1] //segmen terakihr
-				.alternateCells[0]
-			);
-
-			if (routes[0].way.nodes[0].isIntersect) {
-				routes[0]
-				.way
-				.segments[0]
-				.alternateCells[routes[0].way.segments[0].alternateCells.length-1].nextCell = routes[0].way.nodes[0].intersetCell;
+				if (routes[0].segment.nodes[0].isIntersect) {
+					routes[0]
+					.segment
+					.alternateCells[routes[0].segment.alternateCells.length-1].nextCell = routes[0].segment.nodes[0].intersectCell;
+				}	
+			} else { //editStat == 1, mode == alt
+				routes[0].segment.nodes[1]
+				.outCells
+				.push(
+					routes[0]
+					.segment
+					.alternateCells[0]
+				);
+				if (routes[0].segment.nodes[1].isIntersect) {
+					routes[0]
+					.segment
+					.alternateCells[0].prevCell = routes[0].segment.nodes[1].intersectCell;
+				}
 			}
-
-			if (routes[routes.length-1].way.nodes[routes[routes.length-1].way.nodes.length-1].isIntersect) {
-				routes[routes.length-1] //way terakhir
-				.way
-				.segments[routes[routes.length-1].way.segments.length-1] //segmen terakihr
-				.alternateCells[0].	prevCell = routes[routes.length-1].way.nodes[routes[routes.length-1].way.nodes.length-1].intersectCell;
-			}
-
-		} else {
-			routes[routes.length-1]
-			.way.nodes[0]
-			.inCells
-			.push(
-				routes[routes.length-1]
-				.way
-				.segments[0]
-				.alternateCells[routes[routes.length-1].way.segments[0].alternateCells.length-1]
-			);
-
-			routes[0] //way terakhir
-			.way.nodes[routes[0].way.nodes.length-1] //node terakhir
-			.outCells
-			.push(
-				routes[0] //way terakhir
-				.way.segments[routes[0].way.segments.length-1] //segmen terakihr
-				.alternateCells[0]
-			);
-
-			if (routes[routes.length-1].way.nodes[0].isIntersect) {
-				routes[routes.length-1]
-				.way
-				.segments[0]
-				.alternateCells[routes[0].way.segments[0].alternateCells.length-1].nextCell = routes[routes.length-1].way.nodes[0].intersetCell;
-			}
-
-			if (routes[0].way.nodes[routes[0].way.nodes.length-1].isIntersect) {
-				routes[0] //way terakhir
-				.way
-				.segments[routes[0].way.segments.length-1] //segmen terakihr
-				.alternateCells[0].	prevCell = routes[0].way.nodes[routes[0].way.nodes.length-1].intersectCell;
+		} else if (routes[0].segment.editStat == 2) { //
+			if (routes[0].mode == "def") { //edit stat == 2, mode == def
+				routes[0].segment.nodes[0]
+				.outCells
+				.push(
+					routes[0]
+					.segment
+					.defaultCells[0]
+				);
+				if (routes[0].segment.nodes[0].isIntersect) {
+					routes[0]
+					.segment
+					.defaultCells[0].prevCell = routes[0].segment.nodes[0].intersectCell;
+				}
+			} else {
+				routes[0].segment.nodes[1]
+				.inCells
+				.push(
+					routes[0]
+					.segment
+					.defaultCells[routes[0].segment.defaultCells.length-1]
+				);
+				if (routes[0].segment.nodes[1].isIntersect) {
+					routes[0]
+					.segment
+					.defaultCells[routes[0].segment.defaultCells.length-1].nextCell = routes[0].segment.nodes[1].intersectCell;
+				}
 			}
 		}
-	
+		//Set untuk routes[last]
+		if (routes[routes.length-1].segment.editStat == 1) {//edit stat == 1, mode == default
+			if (routes[routes.length-1].mode == "alt") {
+				routes[routes.length-1].segment.nodes[0]
+				.inCells
+				.push(
+					routes[routes.length-1]
+					.segment
+					.alternateCells[routes[routes.length-1].segment.alternateCells.length-1]
+				);
+
+				if (routes[routes.length-1].segment.nodes[0].isIntersect) {
+					routes[routes.length-1]
+					.segment
+					.alternateCells[routes[routes.length-1].segment.alternateCells.length-1].nextCell = routes[routes.length-1].segment.nodes[0].intersectCell;
+				}	
+			} else { //editStat == 1, mode == def
+				routes[routes.length-1].segment.nodes[1]
+				.outCells
+				.push(
+					routes[routes.length-1]
+					.segment
+					.alternateCells[0]
+				);
+				if (routes[routes.length-1].segment.nodes[1].isIntersect) {
+					routes[routes.length-1]
+					.segment
+					.alternateCells[0].prevCell = routes[routes.length-1].segment.nodes[1].intersectCell;
+				}
+			}
+		} else if (routes[routes.length-1].segment.editStat == 2) { //
+			if (routes[routes.length-1].mode == "alt") { //edit stat == 2, mode == def
+				routes[routes.length-1].segment.nodes[0]
+				.outCells
+				.push(
+					routes[routes.length-1]
+					.segment
+					.defaultCells[0]
+				);
+				if (routes[routes.length-1].segment.nodes[0].isIntersect) {
+					routes[routes.length-1]
+					.segment
+					.defaultCells[0].prevCell = routes[routes.length-1].segment.nodes[0].intersectCell;
+				}
+			} else {
+				routes[routes.length-1].segment.nodes[1]
+				.inCells
+				.push(
+					routes[routes.length-1]
+					.segment
+					.defaultCells[routes[routes.length-1].segment.defaultCells.length-1]
+				);
+				if (routes[routes.length-1].segment.nodes[1].isIntersect) {
+					routes[routes.length-1]
+					.segment
+					.defaultCells[routes[routes.length-1].segment.defaultCells.length-1].nextCell = routes[routes.length-1].segment.nodes[1].intersectCell;
+				}
+			}
+		}
 
 		//Marker T_T
 		for (var i = 0; i < routes.length; i++) {
-			routes[i].way.editStat = 3;
-			for (var j = 0; j < routes[i].way.segments.length; j++) {
-				var segment = routes[i].way.segments[j];
+			var segment = routes[i].segment;
+			if (segment.editStat == 1) {
 				segment.markerDecorator.removeFrom(mymap);
 				segment.marker.setOffset(-6);
 				segment.marker.setStyle({color: "purple"});
@@ -1277,100 +1379,7 @@ function editToTwoWay(routes) {
 				segment.altmarker.setStyle({color:"purple"}); //altmarker sudah ada tapi disembunyikan
 				segment.altmarker.addTo(mymap); //ditambahkan lagi ke map, popup sudah ada, sudah ada offset
 				segment.altmarker.bringToBack();
-			}
-		}
-	} else if (routes[0].way.editStat == 2) {
-		//sudah punya alt cell tapi tidak tersambung
-		//hubungkan di ujung2 jalan saja
-		for (var i = 0; i < routes.length-1; i++) {
-			var way1 = routes[i].way;
-			var way2 = routes[i+1].way;
-			if (routes[i].mode == "def") {
-				way1.segments[way1.segments.length-1].defaultCells[way1.segments[way1.segments.length-1].defaultCells.length-1].nextCell = way2.segments[0].defaultCells[0];
-				way2.segments[0].defaultCells[0].prevCell = way1.segments[way1.segments.length-1].defaultCells[way1.segments[way1.segments.length-1].defaultCells.length-1];	
-			} else {
-				way2.segments[way2.segments.length-1].defaultCells[way2.segments[way2.segments.length-1].defaultCells.length-1].nextCell = way1.segments[0].defaultCells[0];
-				way1.segments[0].defaultCells[0].prevCell = way2.segments[way2.segments.length-1].defaultCells[way2.segments[way2.segments.length-1].defaultCells.length-1];	
-			}
-			
-		}
-
-		//hubungkan ke ujung2 jalan
-		if (routes[0].mode == "def") {
-			routes[0]
-			.way.nodes[0]
-			.outCells
-			.push(
-				routes[0]
-				.way
-				.segments[0]
-				.defaultCells[0]
-			);
-
-			routes[routes.length-1] //way terakhir
-			.way.nodes[routes[routes.length-1].way.nodes.length-1] //node terakhir
-			.inCells
-			.push(
-				routes[routes.length-1] //way terakhir
-				.way.segments[routes[routes.length-1].way.segments.length-1] //segmen terakihr
-				.defaultCells[routes[routes.length-1].way.segments[routes[routes.length-1].way.segments.length-1].defaultCells.length-1]
-			);
-
-			if (routes[0].way.nodes[0].isIntersect) {
-				routes[0]
-				.way
-				.segments[0]
-				.defaultCells[0].prevCell = routes[0].way.nodes[0].intersetCell;
-			}
-
-			if (routes[routes.length-1].way.nodes[routes[routes.length-1].way.nodes.length-1].isIntersect) {
-				routes[routes.length-1] //way terakhir
-				.way
-				.segments[routes[routes.length-1].way.segments.length-1] //segmen terakihr
-				.defaultCells[routes[routes.length-1].way.segments[routes[routes.length-1].way.segments.length-1].defaultCells.length-1].nextCell = routes[routes.length-1].way.nodes[routes[routes.length-1].way.nodes.length-1].intersectCell;
-			}
-
-		} else {
-			routes[routes.length-1]
-			.way.nodes[0]
-			.outCells
-			.push(
-				routes[routes.length-1]
-				.way
-				.segments[0]
-				.defaultCells[0]
-			);
-
-			routes[0] //way terakhir
-			.way.nodes[routes[0].way.nodes.length-1] //node terakhir
-			.inCells
-			.push(
-				routes[0] //way terakhir
-				.way.segments[routes[0].way.segments.length-1] //segmen terakihr
-				.defaultCells[routes[0].way.segments[routes[routes.length-1].way.segments.length-1].defaultCells.length-1]
-			);
-
-			if (routes[routes.length-1].way.nodes[0].isIntersect) {
-				routes[routes.length-1]
-				.way
-				.segments[0]
-				.defaultCells[0].prevCell = routes[routes.length-1].way.nodes[0].intersetCell;
-			}
-
-			if (routes[0].way.nodes[routes[0].way.nodes.length-1].isIntersect) {
-				routes[0] //way terakhir
-				.way
-				.segments[routes[0].way.segments.length-1] //segmen terakihr
-				.defaultCells[routes[0].way.segments[routes[0].way.segments.length-1].defaultCells.length-1].nextCell = routes[0].way.nodes[routes[0].way.nodes.length-1].intersectCell;
-			}
-		}
-	
-
-		//Marker T_T
-		for (var i = 0; i < routes.length; i++) {
-			routes[i].way.editStat = 3;
-			for (var j = 0; j < routes[i].way.segments.length; j++) {
-				var segment = routes[i].way.segments[j];
+			} else if (segment.editStat == 2) {
 				segment.altmarkerDecorator.removeFrom(mymap);
 				segment.altmarker.setOffset(-6);
 				segment.altmarker.setStyle({color: "purple"});
@@ -1379,70 +1388,63 @@ function editToTwoWay(routes) {
 				segment.marker.addTo(mymap); //ditambahkan lagi ke map, popup sudah ada, sudah ada offset
 				segment.marker.bringToBack();
 			}
+			segment.editStat = 3;
 		}
-	}
+	} 
 }
 
-function editToOneWay(routes) {
+function editToOneWay(routes) {//masukan pasti dua arah
 	// alert("Enter edit to one way");
 	// alert("enter stat 0, mode: "+routes[0].mode);
-	if (routes[0].mode == "def") {
-		var lastAlternateCell = routes[0].way.segments[0].alternateCells[routes[0].way.segments[0].alternateCells.length-1]; //alternate cell terakhir segmen pertama
-		lastAlternateCell.nextCell = null;
-		// alert(lastAlternateCell.segment === lastAlternateCell.prevCell.segment);
-		var index = routes[0].way.nodes[0].inCells.findIndex( eachCell => eachCell.segment.way === lastAlternateCell.segment.way);
-		routes[0].way.nodes[0].inCells.splice(index,1); //cell sudah diputus
-	} else { //routes[0].mode == "alt"
-		var lastDefaultCell = routes[0].way.segments[routes[0].way.segments.length-1].defaultCells[routes[0].way.segments[routes[0].way.segments.length-1].defaultCells.length-1]; //default cell terakhir segmen terakhir
-		lastDefaultCell.nextCell = null;
-		// alert(lastAlternateCell.segment === lastAlternateCell.prevCell.segment);
-		var index = routes[0].way.nodes[routes[0].way.nodes.length-1].inCells.findIndex( eachCell => eachCell.segment.way === lastDefaultCell.segment.way);
-		routes[0].way.nodes[routes[0].way.nodes.length-1].inCells.splice(index,1); //cell sudah diputus
+	var firstSegment = routes[0];
+	var lastSegment = routes[routes.length-1];
+
+	if (firstSegment.mode == "def") {//def yang digunakan untuk satu arah, putuskan alt cell di nodes[0]
+		var index = firstSegment.segment.nodes[0].inCells.findIndex(eachCell => eachCell.segment === firstSegment.segment);
+		//hilangkan link next cellnya dulu
+		firstSegment.segment.nodes[0].inCells[index].nextCell == null;
+		firstSegment.segment.nodes[0].inCells.splice(index,1); //hapus dari intersectcell
+	} else { //alt yang digunakan satu arah, putuskan def cell di nodes[1]
+		var index = firstSegment.segment.nodes[1].inCells.findIndex(eachCell => eachCell.segment === firstSegment.segment);
+		//hilangkan link next cellnya dulu
+		firstSegment.segment.nodes[1].inCells[index].nextCell == null;
+		firstSegment.segment.nodes[1].inCells.splice(index,1); //hapus dari intersectcell
 	}
 
-	if (routes[routes.length-1].mode == "def") {
-		var firstAlternateCell = routes[routes.length-1].way.segments[routes[routes.length-1].way.segments.length-1].alternateCells[0]; //default cell terakhir segmen terakhir
-		firstAlternateCell.prevCell = null;
-		// alert(lastAlternateCell.segment === lastAlternateCell.prevCell.segment);
-		var index = routes[routes.length-1].way.nodes[routes[routes.length-1].way.nodes.length-1].outCells.findIndex( eachCell => eachCell.segment.way === firstAlternateCell.segment.way);
-		routes[routes.length-1].way.nodes[routes[routes.length-1].way.nodes.length-1].outCells.splice(index,1); //cell sudah diputus
-	} else {
-		var firstDefaultCell = routes[routes.length-1].way.segments[0].defaultCells[0]; //default cell terakhir segmen terakhir
-		firstDefaultCell.prevCell = null;
-		// alert(lastAlternateCell.segment === lastAlternateCell.prevCell.segment);
-		var index = routes[routes.length-1].way.nodes[0].outCells.findIndex( eachCell => eachCell.segment.way === firstDefaultCell.segment.way);
-		routes[routes.length-1].way.nodes[0].outCells.splice(index,1); //cell sudah diputus
+	if (lastSegment.mode == "alt") {//def yang digunakan untuk satu arah, putuskan alt cell di nodes[0]
+		var index = lastSegment.segment.nodes[0].outCells.findIndex(eachCell => eachCell.segment === lastSegment.segment);
+		//hilangkan link next cellnya dulu
+		lastSegment.segment.nodes[0].outCells[index].prevCell == null;
+		lastSegment.segment.nodes[0].outCells.splice(index,1); //hapus dari intersectcell
+	} else { //alt yang digunakan satu arah, putuskan def cell di nodes[1]
+		var index = lastSegment.segment.nodes[1].outCells.findIndex(eachCell => eachCell.segment === lastSegment.segment);
+		//hilangkan link next cellnya dulu
+		lastSegment.segment.nodes[1].outCells[index].prevCell == null;
+		lastSegment.segment.nodes[1].outCells.splice(index,1); //hapus dari intersectcell
 	}
-
 	//Ngurus marker lagi T_T
-	for (var i = 0; i < routes.length; i++) {
+	for (var i = 0 ; i < routes.length; i++) {
+		var segment = routes[i].segment;
 		if (routes[i].mode == "def") {
-			//alt disembunyikan
-			for (var j = 0; j < routes[i].way.segments.length; j ++) {
-				var segment = routes[i].way.segments[j];
-				segment.altmarker.removeFrom(mymap);
-				segment.marker.setOffset(0);
-				segment.marker.setStyle({color:"purple"});
-				segment.markerDecorator = L.polylineDecorator(segment.marker, {
-					patterns: [
-						{offSet:0,repeat:'50%', symbol: L.Symbol.arrowHead({pixelSize: 10, polygon: false, pathOptions: {stroke: true}})}
-					]
-				}).addTo(mymap);
-			}
-			routes[i].way.editStat = 1; //1 arah def
-		} else { //1 arah alt
-			for (var j = 0; j < routes[i].way.segments.length; j ++) {
-				var segment = routes[i].way.segments[j];
-				segment.marker.removeFrom(mymap);
-				segment.altmarker.setOffset(0);
-				segment.altmarker.setStyle({color:"purple"});
-				segment.altmarkerDecorator = L.polylineDecorator(segment.altmarker, {
-					patterns: [
-						{offSet:0,repeat:'50%', symbol: L.Symbol.arrowHead({pixelSize: 10, polygon: false, pathOptions: {stroke: true}})}
-					]
-				}).addTo(mymap);
-			}
-			routes[i].way.editStat = 2; //1 arah def
+			segment.altmarker.removeFrom(mymap);
+			segment.marker.setOffset(0);
+			segment.marker.setStyle({color:"purple"});
+			segment.markerDecorator = L.polylineDecorator(segment.marker, {
+				patterns: [
+					{offSet:0,repeat:'50%', symbol: L.Symbol.arrowHead({pixelSize: 10, polygon: false, pathOptions: {stroke: true}})}
+				]
+			}).addTo(mymap);	
+			segment.editStat = 1;
+		} else { //alt
+			segment.marker.removeFrom(mymap);
+			segment.altmarker.setOffset(0);
+			segment.altmarker.setStyle({color:"purple"});
+			segment.altmarkerDecorator = L.polylineDecorator(segment.altmarker, {
+				patterns: [
+					{offSet:0,repeat:'50%', symbol: L.Symbol.arrowHead({pixelSize: 10, polygon: false, pathOptions: {stroke: true}})}
+				]
+			}).addTo(mymap);
+			segment.editStat = 2;
 		}
 	}
 }
@@ -1478,10 +1480,7 @@ function runSimulation() {
 	// findFirstAccessIntercell();
 	var vehicleGen = parseInt($("#vehicleGen").val());
 	// sourceGenerate(vehicleGen);
-	document.getElementById("wayCount").innerHTML = ways.length;
-	document.getElementById("segmentCount").innerHTML = segments.length;
-	document.getElementById("cellCount").innerHTML = cells.length;
-	document.getElementById("intersectCount").innerHTML = interCells.length;
+
 	// alert("Source cell: "+sourceCells.length);
 	// alert("out?");
 	simulationTimer = setInterval(function() {

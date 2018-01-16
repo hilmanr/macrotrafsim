@@ -9,7 +9,7 @@ header('Access-Control-Allow-Origin: *');
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"
   integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=="
   crossorigin=""/>
-  <link rel="stylesheet" type="text/css" href="jquery.loading.css">
+  <link rel="stylesheet" type="text/css" href="lib/jquery.loading.css">
 </head>
 <style type="text/css">
 	hr { 
@@ -89,12 +89,12 @@ header('Access-Control-Allow-Origin: *');
 
 </body>
 <script type='text/javascript' src='//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js'></script>
-<script type="text/javascript" src="jquery.loading.js"></script>
-<script type="text/javascript" src="leaflet.js"></script>
-<script type="text/javascript" src="L.Symbol.js"></script>  
-<script type="text/javascript" src="patternUtils.js"></script> 
-<script type="text/javascript" src="leaflet.polylineoffset.js"></script> 
-<script type="text/javascript" src="L.PolylineDecorator.js"></script>   
+<script type="text/javascript" src="lib/jquery.loading.js"></script>
+<script type="text/javascript" src="lib/leaflet.js"></script>
+<script type="text/javascript" src="lib/L.Symbol.js"></script>  
+<script type="text/javascript" src="lib/patternUtils.js"></script> 
+<script type="text/javascript" src="lib/leaflet.polylineoffset.js"></script> 
+<script type="text/javascript" src="lib/L.PolylineDecorator.js"></script>   
 <script type="text/javascript" src="http://localhost:3000/simulation-structure.js"></script>
 
 <script type="text/javascript">

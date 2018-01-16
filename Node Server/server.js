@@ -1,8 +1,8 @@
 var express = require('express'),
 	app = express(),
-	port = process.env.PORT || 3000,
+	port = process.env.PORT || 3000;
 	// mongoose = require('mongoose'),
-	bodyParser = require('body-parser');
+	// bodyParser = require('body-parser');s
     // serveStatic = require('serve-static');
 
 app.use(function (req, res, next) {
